@@ -1,0 +1,65 @@
+[package]
+name = "axum-health"
+version = "0.1.0"
+edition = "2021"
+authors = ["Alan Baumgartner"]
+license = "MIT OR Apache-2.0"
+keywords = ["axum", "diesel", "sqlx", "sea-orm"]
+readme = "README.md"
+repository = "https://github.com/alanbaumgartner/axum-health"
+homepage = "https://github.com/alanbaumgartner/axum-health"
+documentation = "https://docs.rs/axum-health"
+description = """
+Spring Boot like health indicators.
+"""
+exclude = ["/tests", "/.github"]
+
+[dependencies]
+async-trait = { version = "0.1.86" }
+axum = { version = "0.8.1" }
+serde = { version = "1.0.217", features = ["derive"] }
+tower-layer = { version = "0.3.3" }
+futures = { version = "0.3.31" }
+
+diesel = { version = "2.2.7", default-features = false, optional = true }
+diesel-async = { version = "0.5.2", default-features = false, optional = true }
+sea-orm = { version = "1.1.5", default-features = false, optional = true }
+sqlx = { version = "0.8.3", default-features = false, optional = true }
+
+[features]
+default = []
+
+diesel-async-postgres = ["diesel-postgres", "diesel-async", "diesel-async/postgres"]
+diesel-async-mysql = ["diesel-mysql", "diesel-async", "diesel-async/mysql"]
+diesel-async-sqlite = ["diesel-sqlite", "diesel-async", "diesel-async/sqlite"]
+diesel-async-deadpool = ["diesel-async", "diesel-async/deadpool"]
+diesel-async-mobc = ["diesel-async", "diesel-async/mobc"]
+diesel-async-bb8 = ["diesel-async", "diesel-async/bb8"]
+diesel-async = ["diesel", "dep:diesel-async"]
+
+diesel-postgres = ["postgres", "diesel", "diesel/postgres"]
+diesel-mysql = ["mysql", "diesel", "diesel/mysql"]
+diesel-sqlite = ["sqlite", "diesel", "diesel/sqlite"]
+diesel = ["dep:diesel", "diesel/r2d2", "diesel/i-implement-a-third-party-backend-and-opt-into-breaking-changes"]
+
+sea-orm-postgres = ["postgres", "sea-orm", "sea-orm/sqlx-postgres"]
+sea-orm-mysql = ["mysql", "sea-orm", "sea-orm/sqlx-mysql"]
+sea-orm-sqlite = ["sqlite", "sea-orm", "sea-orm/sqlx-sqlite"]
+sea-orm = ["dep:sea-orm"]
+
+sqlx-postgres = ["postgres", "sqlx", "sqlx/postgres"]
+sqlx-mysql = ["mysql", "sqlx", "sqlx/mysql"]
+sqlx-sqlite = ["sqlite", "sqlx", "sqlx/sqlite"]
+sqlx = ["dep:sqlx"]
+
+sqlite = []
+mysql = []
+postgres = []
+
+[dev-dependencies]
+axum-test = "17.2.0"
+tokio = { version = "1.43.0", features = ["test-util"] }
+sqlx = { version = "0.8.3", features = ["runtime-tokio"] }
+testcontainers = "0.23.2"
+testcontainers-modules = { version = "0.11.6", features = ["postgres", "mysql"] }
+tempfile = "3.17.1"
