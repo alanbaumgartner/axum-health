@@ -29,32 +29,32 @@ sqlx = { version = "0.8.3", default-features = false, optional = true }
 [features]
 default = []
 
-diesel-async-postgres = ["diesel-postgres", "diesel-async", "diesel-async/postgres"]
-diesel-async-mysql = ["diesel-mysql", "diesel-async", "diesel-async/mysql"]
-diesel-async-sqlite = ["diesel-sqlite", "diesel-async", "diesel-async/sqlite"]
-diesel-async-deadpool = ["diesel-async", "diesel-async/deadpool"]
-diesel-async-mobc = ["diesel-async", "diesel-async/mobc"]
-diesel-async-bb8 = ["diesel-async", "diesel-async/bb8"]
-diesel-async = ["diesel", "dep:diesel-async"]
+diesel-async-postgres = ["diesel-postgres", "_diesel-async", "diesel-async/postgres"]
+diesel-async-mysql = ["diesel-mysql", "_diesel-async", "diesel-async/mysql"]
+diesel-async-sqlite = ["diesel-sqlite", "_diesel-async", "diesel-async/sqlite"]
+diesel-async-deadpool = ["_diesel-async", "diesel-async/deadpool"]
+diesel-async-mobc = ["_diesel-async", "diesel-async/mobc"]
+diesel-async-bb8 = ["_diesel-async", "diesel-async/bb8"]
+_diesel-async = ["_diesel", "dep:diesel-async"]
 
-diesel-postgres = ["postgres", "diesel", "diesel/postgres"]
-diesel-mysql = ["mysql", "diesel", "diesel/mysql"]
-diesel-sqlite = ["sqlite", "diesel", "diesel/sqlite"]
-diesel = ["dep:diesel", "diesel/r2d2", "diesel/i-implement-a-third-party-backend-and-opt-into-breaking-changes"]
+diesel-postgres = ["_postgres", "_diesel", "diesel/postgres"]
+diesel-mysql = ["_mysql", "_diesel", "diesel/mysql"]
+diesel-sqlite = ["_sqlite", "_diesel", "diesel/sqlite"]
+_diesel = ["dep:diesel", "diesel/r2d2", "diesel/i-implement-a-third-party-backend-and-opt-into-breaking-changes"]
 
-sea-orm-postgres = ["postgres", "sea-orm", "sea-orm/sqlx-postgres"]
-sea-orm-mysql = ["mysql", "sea-orm", "sea-orm/sqlx-mysql"]
-sea-orm-sqlite = ["sqlite", "sea-orm", "sea-orm/sqlx-sqlite"]
-sea-orm = ["dep:sea-orm"]
+sea-orm-postgres = ["_postgres", "_sea-orm", "sea-orm/sqlx-postgres"]
+sea-orm-mysql = ["_mysql", "_sea-orm", "sea-orm/sqlx-mysql"]
+sea-orm-sqlite = ["_sqlite", "_sea-orm", "sea-orm/sqlx-sqlite"]
+_sea-orm = ["dep:sea-orm"]
 
-sqlx-postgres = ["postgres", "sqlx", "sqlx/postgres"]
-sqlx-mysql = ["mysql", "sqlx", "sqlx/mysql"]
-sqlx-sqlite = ["sqlite", "sqlx", "sqlx/sqlite"]
-sqlx = ["dep:sqlx"]
+sqlx-postgres = ["_postgres", "_sqlx", "sqlx/postgres"]
+sqlx-mysql = ["_mysql", "_sqlx", "sqlx/mysql"]
+sqlx-sqlite = ["_sqlite", "_sqlx", "sqlx/sqlite"]
+_sqlx = ["dep:sqlx"]
 
-sqlite = []
-mysql = []
-postgres = []
+_sqlite = []
+_mysql = []
+_postgres = []
 
 [dev-dependencies]
 axum-test = "17.2.0"
@@ -63,3 +63,15 @@ sqlx = { version = "0.8.3", features = ["runtime-tokio"] }
 testcontainers = "0.23.2"
 testcontainers-modules = { version = "0.11.6", features = ["postgres", "mysql"] }
 tempfile = "3.17.1"
+
+[[example]]
+name = "diesel"
+required-features = ["diesel-sqlite"]
+
+[[example]]
+name = "sea_orm"
+required-features = ["sea-orm-sqlite"]
+
+[[example]]
+name = "sqlx"
+required-features = ["sqlx-sqlite"]

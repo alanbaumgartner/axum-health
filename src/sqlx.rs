@@ -4,6 +4,7 @@ use async_trait::async_trait;
 use sqlx::pool::Pool;
 use sqlx::{Acquire, Database, Executor};
 
+/// [HealthIndicator] for [sqlx] connection pools
 pub struct SqlxHealthIndicator<DB>
 where
     DB: Database + ValidationQuery,
@@ -18,11 +19,13 @@ where
     DB: Database + ValidationQuery,
     for<'a> &'a mut <DB as Database>::Connection: Executor<'a>,
 {
+    /// Creates a new [SqlxHealthIndicator] with the default name `sqlx-*` depending on the sqlx backend used
     pub fn new(pool: Pool<DB>) -> Self {
         let name = DB::name().to_owned();
         Self { name, pool }
     }
 
+    /// Creates a new [SqlxHealthIndicator] with the given name
     pub fn new_named(name: String, pool: Pool<DB>) -> Self {
         Self { name, pool }
     }

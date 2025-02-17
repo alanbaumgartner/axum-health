@@ -1,4 +1,4 @@
-#[cfg(feature = "sqlite")]
+#[cfg(feature = "_sqlite")]
 mod test {
     use axum::routing::get;
     use axum::Router;

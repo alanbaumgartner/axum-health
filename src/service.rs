@@ -22,21 +22,16 @@ impl Health {
             .collect::<HashMap<_, _>>()
             .await;
 
-        // let statuses = self
-        //     .0
-        //     .values()
-        //     .map(|indicator| (indicator.name(), indicator.details()))
-        //     .collect::<HashMap<_, _>>();
-
-        let worst = statuses
+        // If we have no health indicators, we are up, otherwise we take our worst one and respond with that.
+        let worst_status = statuses
             .values()
             .map(|detail| &detail.status)
-            .min()
+            .max()
             .cloned()
             .unwrap_or(HealthStatus::Up);
 
         HealthDetails {
-            status: worst,
+            status: worst_status,
             components: statuses,
         }
     }
@@ -85,6 +80,7 @@ pub enum HealthStatus {
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct HealthDetails {
     pub status: HealthStatus,
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
     pub components: HashMap<String, HealthDetail>,
 }
 
@@ -180,6 +176,61 @@ mod test {
         let expected = HealthDetails {
             status: HealthStatus::Up,
             components: HashMap::from_iter([("custom".to_owned(), HealthDetail::up())]),
+        };
+
+        assert_eq!(body, expected);
+    }
+
+    #[tokio::test]
+    async fn test_status_down() {
+        struct CustomHealthIndicator {
+            pub value: &'static str,
+        }
+
+        #[async_trait]
+        impl HealthIndicator for CustomHealthIndicator {
+            fn name(&self) -> String {
+                self.value.to_owned()
+            }
+
+            async fn details(&self) -> HealthDetail {
+                HealthDetail::up()
+            }
+        }
+
+        struct CustomHealthIndicator2 {
+            pub value: &'static str,
+        }
+
+        #[async_trait]
+        impl HealthIndicator for CustomHealthIndicator2 {
+            fn name(&self) -> String {
+                self.value.to_owned()
+            }
+
+            async fn details(&self) -> HealthDetail {
+                HealthDetail::down()
+            }
+        }
+
+        let router = Router::new().route("/health", get(health)).layer(
+            Health::builder()
+                .with_indicator(CustomHealthIndicator { value: "custom" })
+                .with_indicator(CustomHealthIndicator2 { value: "custom2" })
+                .build(),
+        );
+
+        let server = TestServer::new(router).unwrap();
+        let response = server.get("/health").await;
+
+        let body = response.json::<HealthDetails>();
+
+        let expected = HealthDetails {
+            status: HealthStatus::Down,
+            components: HashMap::from_iter([
+                ("custom".to_owned(), HealthDetail::up()),
+                ("custom2".to_owned(), HealthDetail::down()),
+            ]),
         };
 
         assert_eq!(body, expected);

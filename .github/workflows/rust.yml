@@ -19,10 +19,4 @@ jobs:
       - name: Build
         run: cargo build
       - name: Run tests
-        run: cargo test
-      - name: Run mysql Tests
-        run: cargo test --features=sqlx-mysql,diesel-mysql,sea-orm-mysql
-      - name: Run Postgres Tests
-        run: cargo test --features=sqlx-postgres,diesel-postgres,sea-orm-postgres
-      - name: Run sqlite Tests
-        run: cargo test --features=sqlx-sqlite,diesel-sqlite,sea-orm-sqlite
+        run: cargo test --features=sqlx-postgres,diesel-postgres,sea-orm-postgres,sqlx-mysql,diesel-mysql,sea-orm-mysql,sqlx-sqlite,diesel-sqlite,sea-orm-sqlite

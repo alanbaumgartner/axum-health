@@ -2,12 +2,16 @@ use crate::service::{HealthDetail, HealthIndicator};
 use async_trait::async_trait;
 use sea_orm::{ConnectionTrait, DatabaseBackend, DatabaseConnection};
 
+/// [HealthIndicator] for [sea_orm] connection pools
+///
+/// Note: You can also create a [crate::sqlx::SqlxHealthIndicator] instead by using the connection pool directly
 pub struct SeaOrmHealthIndicator {
     pub(crate) name: String,
     pub(crate) connection: DatabaseConnection,
 }
 
 impl SeaOrmHealthIndicator {
+    /// Creates a new [SeaOrmHealthIndicator] with the default name `sea-orm-*` depending on the sea-orm backend used
     pub fn new(connection: DatabaseConnection) -> Self {
         let backend = connection.get_database_backend();
 
@@ -21,6 +25,7 @@ impl SeaOrmHealthIndicator {
         Self { name, connection }
     }
 
+    /// Creates a new [SeaOrmHealthIndicator] with the given name
     pub fn new_named(name: String, connection: DatabaseConnection) -> Self {
         Self { name, connection }
     }

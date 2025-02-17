@@ -1,4 +1,4 @@
-#[cfg(feature = "postgres")]
+#[cfg(feature = "_postgres")]
 mod test {
     use axum::routing::get;
     use axum::Router;

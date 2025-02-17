@@ -1,13 +1,20 @@
 pub mod service;
 
-#[cfg(feature = "diesel")]
+#[cfg(feature = "_diesel")]
 pub mod diesel;
-#[cfg(feature = "sea-orm")]
+#[cfg(feature = "_sea-orm")]
 pub mod sea_orm;
-#[cfg(feature = "sqlx")]
+#[cfg(feature = "_sqlx")]
 pub mod sqlx;
 
 pub mod validation;
+
+#[cfg(feature = "_diesel")]
+pub use diesel::*;
+#[cfg(feature = "_sea-orm")]
+pub use sea_orm::*;
+#[cfg(feature = "_sqlx")]
+pub use sqlx::*;
 
 pub use crate::service::*;
 

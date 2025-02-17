@@ -15,7 +15,7 @@ pub trait ValidationQuery {
     fn validation_query() -> &'static str;
 }
 
-#[cfg(feature = "diesel")]
+#[cfg(feature = "_diesel")]
 mod diesel {
     use super::ValidationQuery;
 
@@ -53,7 +53,7 @@ mod diesel {
     }
 }
 
-#[cfg(feature = "sqlx")]
+#[cfg(feature = "_sqlx")]
 mod sqlx {
     use super::ValidationQuery;
 

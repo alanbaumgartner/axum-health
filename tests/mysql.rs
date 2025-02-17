@@ -1,5 +1,5 @@
 #[cfg(test)]
-#[cfg(feature = "mysql")]
+#[cfg(feature = "_mysql")]
 mod test {
     use axum::routing::get;
     use axum::Router;
