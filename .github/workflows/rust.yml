@@ -15,8 +15,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: taiki-e/install-action@nextest
       - uses: actions/checkout@v4
       - name: Build
         run: cargo build
       - name: Run tests
-        run: cargo test --features=sqlx-postgres,diesel-postgres,sea-orm-postgres,sqlx-mysql,diesel-mysql,sea-orm-mysql,sqlx-sqlite,diesel-sqlite,sea-orm-sqlite
+        run: cargo nextest run --features=sqlx-postgres,diesel-postgres,sea-orm-postgres,sqlx-mysql,diesel-mysql,sea-orm-mysql,sqlx-sqlite,diesel-sqlite,sea-orm-sqlite

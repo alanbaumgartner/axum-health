@@ -2,7 +2,7 @@ use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::get;
-use axum::{Router, ServiceExt};
+use axum::Router;
 use axum_health::diesel::DieselHealthIndicator;
 use axum_health::Health;
 use diesel::r2d2::{ConnectionManager, Pool};

@@ -1,5 +1,6 @@
 #[cfg(feature = "_sqlite")]
 mod test {
+    use axum::http::StatusCode;
     use axum::routing::get;
     use axum::Router;
     use axum_health::diesel::DieselHealthIndicator;
@@ -84,6 +85,8 @@ mod test {
         let server = TestServer::new(router).unwrap();
 
         let response = server.get("/health").await;
+        assert_eq!(response.status_code(), StatusCode::OK);
+
         let body = response.json::<HealthDetails>();
 
         let expected = HealthDetails {

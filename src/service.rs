@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use axum::http::StatusCode;
 use axum::middleware::AddExtension;
 use axum::response::{IntoResponse, Response};
 use axum::{Extension, Json};
@@ -86,7 +87,11 @@ pub struct HealthDetails {
 
 impl IntoResponse for HealthDetails {
     fn into_response(self) -> Response {
-        Json(self).into_response()
+        let status_code = match &self.status {
+            HealthStatus::Down | HealthStatus::OutOfService => StatusCode::SERVICE_UNAVAILABLE,
+            _ => StatusCode::OK,
+        };
+        (status_code, Json(self)).into_response()
     }
 }
 
@@ -123,10 +128,33 @@ mod test {
     use crate::health;
     use crate::service::{Health, HealthDetail, HealthDetails, HealthIndicator, HealthStatus};
     use async_trait::async_trait;
+    use axum::http::StatusCode;
     use axum::routing::get;
     use axum::Router;
     use axum_test::TestServer;
     use std::collections::HashMap;
+
+    pub struct MockHealthIndicator {
+        name: String,
+        response: HealthDetail,
+    }
+
+    impl MockHealthIndicator {
+        pub fn new(name: String, response: HealthDetail) -> Self {
+            MockHealthIndicator { name, response }
+        }
+    }
+
+    #[async_trait]
+    impl HealthIndicator for MockHealthIndicator {
+        fn name(&self) -> String {
+            self.name.to_owned()
+        }
+
+        async fn details(&self) -> HealthDetail {
+            self.response.clone()
+        }
+    }
 
     #[tokio::test]
     async fn test_health() {
@@ -147,29 +175,19 @@ mod test {
 
     #[tokio::test]
     async fn test_custom_health_indicator() {
-        struct CustomHealthIndicator {
-            pub value: &'static str,
-        }
-
-        #[async_trait]
-        impl HealthIndicator for CustomHealthIndicator {
-            fn name(&self) -> String {
-                self.value.to_owned()
-            }
-
-            async fn details(&self) -> HealthDetail {
-                HealthDetail::up()
-            }
-        }
-
         let router = Router::new().route("/health", get(health)).layer(
             Health::builder()
-                .with_indicator(CustomHealthIndicator { value: "custom" })
+                .with_indicator(MockHealthIndicator::new(
+                    "custom".to_string(),
+                    HealthDetail::up(),
+                ))
                 .build(),
         );
 
         let server = TestServer::new(router).unwrap();
         let response = server.get("/health").await;
+
+        assert_eq!(response.status_code(), StatusCode::OK);
 
         let body = response.json::<HealthDetails>();
 
@@ -183,53 +201,31 @@ mod test {
 
     #[tokio::test]
     async fn test_status_down() {
-        struct CustomHealthIndicator {
-            pub value: &'static str,
-        }
-
-        #[async_trait]
-        impl HealthIndicator for CustomHealthIndicator {
-            fn name(&self) -> String {
-                self.value.to_owned()
-            }
-
-            async fn details(&self) -> HealthDetail {
-                HealthDetail::up()
-            }
-        }
-
-        struct CustomHealthIndicator2 {
-            pub value: &'static str,
-        }
-
-        #[async_trait]
-        impl HealthIndicator for CustomHealthIndicator2 {
-            fn name(&self) -> String {
-                self.value.to_owned()
-            }
-
-            async fn details(&self) -> HealthDetail {
-                HealthDetail::down()
-            }
-        }
-
         let router = Router::new().route("/health", get(health)).layer(
             Health::builder()
-                .with_indicator(CustomHealthIndicator { value: "custom" })
-                .with_indicator(CustomHealthIndicator2 { value: "custom2" })
+                .with_indicator(MockHealthIndicator::new(
+                    "upper".to_string(),
+                    HealthDetail::up(),
+                ))
+                .with_indicator(MockHealthIndicator::new(
+                    "downer".to_string(),
+                    HealthDetail::down(),
+                ))
                 .build(),
         );
 
         let server = TestServer::new(router).unwrap();
         let response = server.get("/health").await;
 
+        assert_eq!(response.status_code(), StatusCode::SERVICE_UNAVAILABLE);
+
         let body = response.json::<HealthDetails>();
 
         let expected = HealthDetails {
             status: HealthStatus::Down,
             components: HashMap::from_iter([
-                ("custom".to_owned(), HealthDetail::up()),
-                ("custom2".to_owned(), HealthDetail::down()),
+                ("upper".to_owned(), HealthDetail::up()),
+                ("downer".to_owned(), HealthDetail::down()),
             ]),
         };
 

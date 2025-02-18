@@ -1,5 +1,6 @@
 #[cfg(feature = "_postgres")]
 mod test {
+    use axum::http::StatusCode;
     use axum::routing::get;
     use axum::Router;
     use axum_health::diesel::DieselHealthIndicator;
@@ -122,6 +123,8 @@ mod test {
         let server = TestServer::new(router).unwrap();
 
         let response = server.get("/health").await;
+        assert_eq!(response.status_code(), StatusCode::OK);
+
         let body = response.json::<HealthDetails>();
 
         let expected = HealthDetails {
@@ -146,6 +149,8 @@ mod test {
         container.stop().await.unwrap();
 
         let response = server.get("/health").await;
+        assert_eq!(response.status_code(), StatusCode::SERVICE_UNAVAILABLE);
+
         let body = response.json::<HealthDetails>();
 
         let expected = HealthDetails {
