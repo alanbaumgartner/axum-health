@@ -3,7 +3,7 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::Router;
-use axum_health::sqlx::SqlxHealthIndicator;
+use axum_health::database::DatabaseHealthIndicator;
 use axum_health::Health;
 use sqlx::SqlitePool;
 use tokio::net::TcpListener;
@@ -13,7 +13,7 @@ async fn main() {
     let pool = SqlitePool::connect("test.db").await.unwrap();
 
     // Clone the pool!
-    let indicator = SqlxHealthIndicator::new(pool.clone());
+    let indicator = DatabaseHealthIndicator::new("sqlx".to_owned(), pool.clone());
 
     let router = Router::new()
         .route("/health", get(axum_health::health))
@@ -29,7 +29,7 @@ async fn main() {
         .unwrap()
 }
 
-async fn things(State(pool): State<SqlitePool>) -> impl IntoResponse {
+async fn things(State(_pool): State<SqlitePool>) -> impl IntoResponse {
     // Do whatever
     StatusCode::OK
 }

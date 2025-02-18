@@ -29,49 +29,36 @@ sqlx = { version = "0.8.3", default-features = false, optional = true }
 [features]
 default = []
 
-diesel-async-postgres = ["diesel-postgres", "_diesel-async", "diesel-async/postgres"]
-diesel-async-mysql = ["diesel-mysql", "_diesel-async", "diesel-async/mysql"]
-diesel-async-sqlite = ["diesel-sqlite", "_diesel-async", "diesel-async/sqlite"]
-diesel-async-deadpool = ["_diesel-async", "diesel-async/deadpool"]
-diesel-async-mobc = ["_diesel-async", "diesel-async/mobc"]
-diesel-async-bb8 = ["_diesel-async", "diesel-async/bb8"]
-_diesel-async = ["_diesel", "dep:diesel-async"]
+diesel-async-postgres = ["_diesel-async", "diesel-async/postgres"]
+diesel-async-mysql = ["_diesel-async", "diesel-async/mysql"]
+diesel-deadpool = ["_diesel-async", "diesel-async/deadpool"]
+diesel-mobc = ["_diesel-async", "diesel-async/mobc"]
+diesel-bb8 = ["_diesel-async", "diesel-async/bb8"]
+_diesel-async = ["diesel", "dep:diesel-async"]
 
-diesel-postgres = ["_postgres", "_diesel", "diesel/postgres"]
-diesel-mysql = ["_mysql", "_diesel", "diesel/mysql"]
-diesel-sqlite = ["_sqlite", "_diesel", "diesel/sqlite"]
-_diesel = ["dep:diesel", "diesel/r2d2", "diesel/i-implement-a-third-party-backend-and-opt-into-breaking-changes"]
-
-sea-orm-postgres = ["_postgres", "_sea-orm", "sea-orm/sqlx-postgres"]
-sea-orm-mysql = ["_mysql", "_sea-orm", "sea-orm/sqlx-mysql"]
-sea-orm-sqlite = ["_sqlite", "_sea-orm", "sea-orm/sqlx-sqlite"]
-_sea-orm = ["dep:sea-orm"]
-
-sqlx-postgres = ["_postgres", "_sqlx", "sqlx/postgres"]
-sqlx-mysql = ["_mysql", "_sqlx", "sqlx/mysql"]
-sqlx-sqlite = ["_sqlite", "_sqlx", "sqlx/sqlite"]
-_sqlx = ["dep:sqlx"]
-
-_sqlite = []
-_mysql = []
-_postgres = []
+diesel = ["dep:diesel", "diesel/i-implement-a-third-party-backend-and-opt-into-breaking-changes"]
+sea-orm = ["dep:sea-orm"]
+sqlx = ["dep:sqlx"]
 
 [dev-dependencies]
+diesel-async = { version = "0.5.2", features = ["mysql", "sqlite", "postgres", "deadpool", "mobc", "bb8"] }
+diesel = { version = "2.2.7", features = ["r2d2", "mysql", "sqlite", "postgres"] }
+sqlx = { version = "0.8.3", features = ["runtime-tokio", "mysql", "sqlite", "postgres"] }
+sea-orm = { version = "1.1.5", features = ["sqlx-postgres", "sqlx-mysql", "sqlx-sqlite"] }
 axum-test = "17.2.0"
 tokio = { version = "1.43.0", features = ["test-util"] }
-sqlx = { version = "0.8.3", features = ["runtime-tokio"] }
-testcontainers = "0.23.2"
+testcontainers = { version = "0.23.2" }
 testcontainers-modules = { version = "0.11.6", features = ["postgres", "mysql"] }
 tempfile = "3.17.1"
 
 [[example]]
 name = "diesel"
-required-features = ["diesel-sqlite"]
+required-features = ["diesel", "diesel/sqlite"]
 
 [[example]]
 name = "sea_orm"
-required-features = ["sea-orm-sqlite"]
+required-features = ["sea-orm", "sea-orm/sqlx-sqlite"]
 
 [[example]]
 name = "sqlx"
-required-features = ["sqlx-sqlite"]
+required-features = ["sqlx-sqlite", "sqlx/sqlite"]

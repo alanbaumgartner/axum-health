@@ -3,7 +3,7 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::Router;
-use axum_health::sea_orm::SeaOrmHealthIndicator;
+use axum_health::database::DatabaseHealthIndicator;
 use axum_health::Health;
 use sea_orm::DatabaseConnection;
 use sqlx::SqlitePool;
@@ -15,7 +15,7 @@ async fn main() {
     let database_connection = DatabaseConnection::from(pool);
 
     // Clone the pool!
-    let indicator = SeaOrmHealthIndicator::new(database_connection.clone());
+    let indicator = DatabaseHealthIndicator::new("sea-orm".to_owned(), database_connection.clone());
 
     let router = Router::new()
         .route("/health", get(axum_health::health))
@@ -31,7 +31,7 @@ async fn main() {
         .unwrap()
 }
 
-async fn things(State(pool): State<DatabaseConnection>) -> impl IntoResponse {
+async fn things(State(_pool): State<DatabaseConnection>) -> impl IntoResponse {
     // Do whatever
     StatusCode::OK
 }

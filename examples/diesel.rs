@@ -3,7 +3,7 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::Router;
-use axum_health::diesel::DieselHealthIndicator;
+use axum_health::database::DatabaseHealthIndicator;
 use axum_health::Health;
 use diesel::r2d2::{ConnectionManager, Pool};
 use tokio::net::TcpListener;
@@ -14,7 +14,7 @@ async fn main() {
     let pool = Pool::builder().build(manager).unwrap();
 
     // Clone the pool!
-    let indicator = DieselHealthIndicator::new(pool.clone());
+    let indicator = DatabaseHealthIndicator::new("diesel".to_owned(), pool.clone());
 
     let router = Router::new()
         .route("/health", get(axum_health::health))
@@ -31,7 +31,7 @@ async fn main() {
 }
 
 async fn things(
-    State(pool): State<Pool<ConnectionManager<diesel::SqliteConnection>>>,
+    State(_pool): State<Pool<ConnectionManager<diesel::SqliteConnection>>>,
 ) -> impl IntoResponse {
     // Do whatever
     StatusCode::OK
