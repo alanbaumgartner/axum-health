@@ -21,4 +21,4 @@ jobs:
       - name: Build
         run: cargo build
       - name: Test
-        run: cargo nextest run --features=sqlx-postgres,diesel-postgres,sea-orm-postgres,sqlx-mysql,diesel-mysql,sea-orm-mysql,sqlx-sqlite,diesel-sqlite,sea-orm-sqlite
+        run: cargo nextest run --features=diesel-async-mysql,diesel-mobc,diesel-deadpool,diesel-bb8,sea-orm,sqlx,diesel-async-postgres
