@@ -61,4 +61,4 @@ required-features = ["sea-orm", "sea-orm/sqlx-sqlite"]
 
 [[example]]
 name = "sqlx"
-required-features = ["sqlx-sqlite", "sqlx/sqlite"]
+required-features = ["sqlx", "sqlx/sqlite"]
