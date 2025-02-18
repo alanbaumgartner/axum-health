@@ -6,8 +6,7 @@
 <a href="https://docs.rs/axum-health"><img src="https://docs.rs/axum-health/badge.svg" /></a>
 </div>
 
-[Spring Boot](https://spring.io/projects/spring-boot)
--like [health indicators](https://docs.spring.io/spring-boot/api/rest/actuator/health.html).
+[Spring Boot](https://spring.io/projects/spring-boot)-like [health indicators](https://docs.spring.io/spring-boot/api/rest/actuator/health.html).
 
 ## Usage
 

@@ -7,9 +7,10 @@ use axum_health::service::{Health, HealthDetail, HealthDetails, HealthIndicator,
 use axum_test::TestServer;
 use diesel::r2d2::{ConnectionManager, Pool};
 use sea_orm::DatabaseConnection;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fs::OpenOptions;
 
+#[cfg(feature = "diesel-r2d2")]
 #[tokio::test]
 async fn test_diesel() {
     let file = tempfile::tempdir().unwrap();
@@ -30,6 +31,7 @@ async fn test_diesel() {
     run_test("diesel-sqlite".to_owned(), indicator).await;
 }
 
+#[cfg(feature = "sqlx")]
 #[tokio::test]
 async fn test_sqlx() {
     let file = tempfile::tempdir().unwrap();
@@ -48,6 +50,7 @@ async fn test_sqlx() {
     run_test("sqlx-sqlite".to_owned(), indicator).await;
 }
 
+#[cfg(feature = "sea-orm")]
 #[tokio::test]
 async fn test_sea_orm() {
     let file = tempfile::tempdir().unwrap();
@@ -82,7 +85,7 @@ pub async fn run_test(name: String, indicator: impl HealthIndicator + Send + Syn
 
     let expected = HealthDetails {
         status: HealthStatus::Up,
-        components: HashMap::from_iter([(name, HealthDetail::up())]),
+        components: BTreeMap::from_iter([(name, HealthDetail::up())]),
     };
 
     assert_eq!(body, expected);

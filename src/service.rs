@@ -5,12 +5,12 @@ use axum::response::{IntoResponse, Response};
 use axum::{Extension, Json};
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::sync::Arc;
 use tower_layer::Layer;
 
 #[derive(Clone)]
-pub struct Health(Arc<HashMap<String, Arc<dyn HealthIndicator + Send + Sync + 'static>>>);
+pub struct Health(Arc<BTreeMap<String, Arc<dyn HealthIndicator + Send + Sync + 'static>>>);
 
 impl Health {
     pub fn builder() -> HealthBuilder {
@@ -20,7 +20,7 @@ impl Health {
     pub async fn details(&self) -> HealthDetails {
         let statuses = futures::stream::iter(self.0.values())
             .then(|indicator| async move { (indicator.name(), indicator.details().await) })
-            .collect::<HashMap<_, _>>()
+            .collect::<BTreeMap<_, _>>()
             .await;
 
         // If we have no health indicators, we are up, otherwise we take our worst one and respond with that.
@@ -47,7 +47,7 @@ impl<S> Layer<S> for Health {
 }
 
 #[derive(Default)]
-pub struct HealthBuilder(HashMap<String, Arc<dyn HealthIndicator + Send + Sync + 'static>>);
+pub struct HealthBuilder(BTreeMap<String, Arc<dyn HealthIndicator + Send + Sync + 'static>>);
 
 impl HealthBuilder {
     pub fn with_indicator<I>(mut self, indicator: I) -> Self
@@ -81,8 +81,8 @@ pub enum HealthStatus {
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct HealthDetails {
     pub status: HealthStatus,
-    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
-    pub components: HashMap<String, HealthDetail>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub components: BTreeMap<String, HealthDetail>,
 }
 
 impl IntoResponse for HealthDetails {
@@ -98,7 +98,7 @@ impl IntoResponse for HealthDetails {
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct HealthDetail {
     pub status: HealthStatus,
-    pub details: HashMap<String, String>,
+    pub details: BTreeMap<String, String>,
 }
 
 impl HealthDetail {
@@ -132,7 +132,7 @@ mod test {
     use axum::routing::get;
     use axum::Router;
     use axum_test::TestServer;
-    use std::collections::HashMap;
+    use std::collections::BTreeMap;
 
     pub struct MockHealthIndicator {
         name: String,
@@ -193,7 +193,7 @@ mod test {
 
         let expected = HealthDetails {
             status: HealthStatus::Up,
-            components: HashMap::from_iter([("custom".to_owned(), HealthDetail::up())]),
+            components: BTreeMap::from_iter([("custom".to_owned(), HealthDetail::up())]),
         };
 
         assert_eq!(body, expected);
@@ -223,7 +223,7 @@ mod test {
 
         let expected = HealthDetails {
             status: HealthStatus::Down,
-            components: HashMap::from_iter([
+            components: BTreeMap::from_iter([
                 ("upper".to_owned(), HealthDetail::up()),
                 ("downer".to_owned(), HealthDetail::down()),
             ]),

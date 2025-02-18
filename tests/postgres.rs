@@ -11,7 +11,7 @@ mod local {
     use diesel_async::pooled_connection::AsyncDieselConnectionManager;
     use diesel_async::AsyncPgConnection;
     use sea_orm::DatabaseConnection;
-    use std::collections::HashMap;
+    use std::collections::BTreeMap;
     use std::time::Duration;
     use testcontainers::runners::AsyncRunner;
     use testcontainers::ContainerAsync;
@@ -49,12 +49,15 @@ mod local {
 
     async fn async_diesel_mobc(url: &str) -> impl HealthIndicator {
         let manager = AsyncDieselConnectionManager::<AsyncPgConnection>::new(url.to_owned());
-        let pool = diesel_async::pooled_connection::mobc::Pool::builder().build(manager);
+        let pool = diesel_async::pooled_connection::mobc::Pool::builder()
+            .max_open(1)
+            .build(manager);
         DatabaseHealthIndicator::new("diesel-mobc".to_owned(), pool)
     }
 
     async fn sqlx(url: &str) -> impl HealthIndicator {
         let pool = sqlx::postgres::PgPoolOptions::new()
+            .max_connections(1)
             .acquire_timeout(Duration::from_secs(5))
             .connect(&url)
             .await
@@ -64,6 +67,7 @@ mod local {
 
     async fn sea_orm(url: &str) -> impl HealthIndicator {
         let pool = sqlx::postgres::PgPoolOptions::new()
+            .max_connections(1)
             .acquire_timeout(Duration::from_secs(5))
             .connect(&url)
             .await
@@ -101,7 +105,7 @@ mod local {
 
         let expected = HealthDetails {
             status: HealthStatus::Up,
-            components: HashMap::from_iter([
+            components: BTreeMap::from_iter([
                 ("diesel-postgres".to_owned(), HealthDetail::up()),
                 ("diesel-bb8".to_owned(), HealthDetail::up()),
                 ("diesel-deadpool".to_owned(), HealthDetail::up()),
@@ -120,7 +124,7 @@ mod local {
 
         let expected = HealthDetails {
             status: HealthStatus::Down,
-            components: HashMap::from_iter([
+            components: BTreeMap::from_iter([
                 ("diesel-postgres".to_owned(), HealthDetail::down()),
                 ("diesel-bb8".to_owned(), HealthDetail::down()),
                 ("diesel-deadpool".to_owned(), HealthDetail::down()),

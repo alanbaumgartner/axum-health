@@ -29,14 +29,14 @@ sqlx = { version = "0.8.3", default-features = false, optional = true }
 [features]
 default = []
 
-diesel-async-postgres = ["_diesel-async", "diesel-async/postgres"]
-diesel-async-mysql = ["_diesel-async", "diesel-async/mysql"]
 diesel-deadpool = ["_diesel-async", "diesel-async/deadpool"]
 diesel-mobc = ["_diesel-async", "diesel-async/mobc"]
 diesel-bb8 = ["_diesel-async", "diesel-async/bb8"]
-_diesel-async = ["diesel", "dep:diesel-async"]
+_diesel-async = ["_diesel", "dep:diesel-async"]
 
-diesel = ["dep:diesel", "diesel/i-implement-a-third-party-backend-and-opt-into-breaking-changes"]
+diesel-r2d2 = ["_diesel", "diesel/r2d2"]
+_diesel = ["dep:diesel", "diesel/i-implement-a-third-party-backend-and-opt-into-breaking-changes"]
+
 sea-orm = ["dep:sea-orm"]
 sqlx = ["dep:sqlx"]
 
