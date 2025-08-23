@@ -13,17 +13,7 @@ use std::fs::OpenOptions;
 #[cfg(feature = "diesel-r2d2")]
 #[tokio::test]
 async fn test_diesel() {
-    let file = tempfile::tempdir().unwrap();
-    let path = file.path().join("test.db");
-    let url = path.to_str().unwrap();
-    {
-        OpenOptions::new()
-            .create(true)
-            .write(true)
-            .open(url)
-            .unwrap();
-    }
-
+    let url = get_sqlite_path();
     let manager = ConnectionManager::<diesel::SqliteConnection>::new(url);
     let pool = Pool::builder().build(manager).unwrap();
     let indicator = DatabaseHealthIndicator::new("diesel-sqlite".to_owned(), pool);
@@ -34,25 +24,25 @@ async fn test_diesel() {
 #[cfg(feature = "sqlx")]
 #[tokio::test]
 async fn test_sqlx() {
-    let file = tempfile::tempdir().unwrap();
-    let path = file.path().join("test.db");
-    let url = path.to_str().unwrap();
-    {
-        OpenOptions::new()
-            .create(true)
-            .write(true)
-            .open(url)
-            .unwrap();
-    }
-
-    let pool = sqlx::sqlite::SqlitePool::connect(url).await.unwrap();
+    let url = get_sqlite_path();
+    let pool = sqlx::sqlite::SqlitePool::connect(url.as_str()).await.unwrap();
     let indicator = DatabaseHealthIndicator::new("sqlx-sqlite".to_owned(), pool);
+    
     run_test("sqlx-sqlite".to_owned(), indicator).await;
 }
 
 #[cfg(feature = "sea-orm")]
 #[tokio::test]
 async fn test_sea_orm() {
+    let url = get_sqlite_path();
+    let pool = sqlx::sqlite::SqlitePool::connect(url.as_str()).await.unwrap();
+    let database = DatabaseConnection::from(pool);
+    let indicator = DatabaseHealthIndicator::new("sea-orm-sqlite".to_owned(), database);
+
+    run_test("sea-orm-sqlite".to_owned(), indicator).await;
+}
+
+fn get_sqlite_path() -> String {
     let file = tempfile::tempdir().unwrap();
     let path = file.path().join("test.db");
     let url = path.to_str().unwrap();
@@ -63,12 +53,7 @@ async fn test_sea_orm() {
             .open(url)
             .unwrap();
     }
-
-    let pool = sqlx::sqlite::SqlitePool::connect(url).await.unwrap();
-    let database = DatabaseConnection::from(pool);
-    let indicator = DatabaseHealthIndicator::new("sea-orm-sqlite".to_owned(), database);
-
-    run_test("sea-orm-sqlite".to_owned(), indicator).await;
+    url.to_owned()
 }
 
 pub async fn run_test(name: String, indicator: impl HealthIndicator + Send + Sync + 'static) {

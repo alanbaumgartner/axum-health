@@ -1,6 +1,12 @@
 pub mod service;
 
+#[cfg(feature = "database")]
 pub mod database;
+
+pub mod indicators;
+
+#[cfg(feature = "kafka")]
+pub mod kafka;
 
 pub use crate::service::*;
 

@@ -15,50 +15,63 @@ Spring Boot like health indicators.
 exclude = ["/tests", "/.github"]
 
 [dependencies]
-async-trait = { version = "0.1.86" }
-axum = { version = "0.8.1" }
-serde = { version = "1.0.217", features = ["derive"] }
-tower-layer = { version = "0.3.3" }
-futures = { version = "0.3.31" }
+tokio = { version = "1" }
+async-trait = { version = "0" }
+axum = { version = "0.8" }
+serde = { version = "1", features = ["derive"] }
+tower-layer = { version = "0.3" }
+futures = { version = "0.3" }
 
-diesel = { version = "2.2.7", default-features = false, optional = true }
-diesel-async = { version = "0.5.2", default-features = false, optional = true }
-sea-orm = { version = "1.1.5", default-features = false, optional = true }
-sqlx = { version = "0.8.3", default-features = false, optional = true }
+diesel = { version = "2", default-features = false, optional = true }
+diesel-async = { version = "0.6", default-features = false, optional = true }
+sea-orm = { version = "1", default-features = false, optional = true }
+sqlx = { version = "0.8", default-features = false, optional = true }
+rdkafka = { version = "0.38", default-features = false, features = ["cmake-build"], optional = true }
+uom = "0.37"
+sysinfo = "0.37"
 
 [features]
 default = []
 
-diesel-deadpool = ["_diesel-async", "diesel-async/deadpool"]
-diesel-mobc = ["_diesel-async", "diesel-async/mobc"]
-diesel-bb8 = ["_diesel-async", "diesel-async/bb8"]
-_diesel-async = ["_diesel", "dep:diesel-async"]
+kafka = ["rdkafka"]
 
-diesel-r2d2 = ["_diesel", "diesel/r2d2"]
-_diesel = ["dep:diesel", "diesel/i-implement-a-third-party-backend-and-opt-into-breaking-changes"]
+diesel-deadpool = ["database", "diesel-async", "diesel-async/deadpool"]
+diesel-mobc = ["database", "diesel-async", "diesel-async/mobc"]
+diesel-bb8 = ["database", "diesel-async", "diesel-async/bb8"]
+diesel-async = ["database", "diesel", "dep:diesel-async"]
 
-sea-orm = ["dep:sea-orm"]
-sqlx = ["dep:sqlx"]
+diesel-r2d2 = ["database", "diesel", "diesel/r2d2"]
+diesel = ["database", "dep:diesel", "diesel/i-implement-a-third-party-backend-and-opt-into-breaking-changes"]
+
+sea-orm = ["database", "dep:sea-orm"]
+sqlx = ["database", "dep:sqlx"]
+
+database = []
 
 [dev-dependencies]
-diesel-async = { version = "0.5.2", features = ["mysql", "sqlite", "postgres", "deadpool", "mobc", "bb8"] }
-diesel = { version = "2.2.7", features = ["r2d2", "mysql", "sqlite", "postgres"] }
-sqlx = { version = "0.8.3", features = ["runtime-tokio", "mysql", "sqlite", "postgres"] }
-sea-orm = { version = "1.1.5", features = ["sqlx-postgres", "sqlx-mysql", "sqlx-sqlite"] }
-axum-test = "17.2.0"
-tokio = { version = "1.43.0", features = ["test-util"] }
-testcontainers = { version = "0.23.2" }
-testcontainers-modules = { version = "0.11.6", features = ["postgres", "mysql"] }
-tempfile = "3.17.1"
+diesel-async = { version = "0.6", features = ["mysql", "sqlite", "postgres", "deadpool", "mobc", "bb8"] }
+diesel = { version = "2", features = ["r2d2", "mysql", "sqlite", "postgres"] }
+sqlx = { version = "0.8", features = ["runtime-tokio", "mysql", "sqlite", "postgres"] }
+sea-orm = { version = "1", features = ["sqlx-postgres", "sqlx-mysql", "sqlx-sqlite"] }
+axum-test = "17"
+tokio = { version = "1", features = ["test-util"] }
+testcontainers = { version = "0.23" }
+testcontainers-modules = { version = "0.12", features = ["postgres", "mysql"] }
+tempfile = "3"
+rdkafka = { version = "0.38.0", features = ["cmake-build"] }
 
 [[example]]
 name = "diesel"
-required-features = ["diesel", "diesel/sqlite"]
+required-features = ["database", "diesel", "diesel/sqlite"]
 
 [[example]]
 name = "sea_orm"
-required-features = ["sea-orm", "sea-orm/sqlx-sqlite"]
+required-features = ["database", "sea-orm", "sea-orm/sqlx-sqlite"]
 
 [[example]]
 name = "sqlx"
-required-features = ["sqlx", "sqlx/sqlite"]
+required-features = ["database", "sqlx", "sqlx/sqlite"]
+
+[[example]]
+name = "kafka"
+required-features = ["kafka"]

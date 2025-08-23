@@ -117,8 +117,8 @@ impl HealthDetail {
         HealthDetail::new(HealthStatus::Down)
     }
 
-    pub fn with_detail(&mut self, name: String, detail: String) -> &mut Self {
-        self.details.insert(name, detail);
+    pub fn with_detail(mut self, name: impl ToString, detail: impl ToString) -> Self {
+        self.details.insert(name.to_string(), detail.to_string());
         self
     }
 }

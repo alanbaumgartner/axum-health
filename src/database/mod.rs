@@ -1,7 +1,7 @@
 use crate::{HealthDetail, HealthIndicator};
 use async_trait::async_trait;
 
-#[cfg(feature = "_diesel")]
+#[cfg(feature = "diesel")]
 pub mod diesel;
 #[cfg(feature = "sea-orm")]
 pub mod sea_orm;
