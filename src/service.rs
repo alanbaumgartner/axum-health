@@ -1,13 +1,17 @@
-use async_trait::async_trait;
-use axum::http::StatusCode;
-use axum::middleware::AddExtension;
-use axum::response::{IntoResponse, Response};
-use axum::{Extension, Json};
-use futures::StreamExt;
-use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
-use std::sync::Arc;
-use tower_layer::Layer;
+use {
+    crate::indicators::PingHealthIndicator,
+    async_trait::async_trait,
+    axum::{
+        http::StatusCode,
+        middleware::AddExtension,
+        response::{IntoResponse, Response},
+        Extension, Json,
+    },
+    futures::StreamExt,
+    serde::{Deserialize, Serialize},
+    std::{collections::BTreeMap, sync::Arc},
+    tower_layer::Layer,
+};
 
 #[derive(Clone)]
 pub struct Health(Arc<BTreeMap<String, Arc<dyn HealthIndicator + Send + Sync + 'static>>>);
@@ -46,8 +50,13 @@ impl<S> Layer<S> for Health {
     }
 }
 
-#[derive(Default)]
 pub struct HealthBuilder(BTreeMap<String, Arc<dyn HealthIndicator + Send + Sync + 'static>>);
+
+impl Default for HealthBuilder {
+    fn default() -> Self {
+        HealthBuilder(BTreeMap::default()).with_indicator(PingHealthIndicator)
+    }
+}
 
 impl HealthBuilder {
     pub fn with_indicator<I>(mut self, indicator: I) -> Self
@@ -125,24 +134,20 @@ impl HealthDetail {
 
 #[cfg(test)]
 mod test {
-    use crate::health;
-    use crate::service::{Health, HealthDetail, HealthDetails, HealthIndicator, HealthStatus};
-    use async_trait::async_trait;
-    use axum::http::StatusCode;
-    use axum::routing::get;
-    use axum::Router;
-    use axum_test::TestServer;
-    use std::collections::BTreeMap;
+    use {
+        crate::{
+            health,
+            service::{Health, HealthDetail, HealthDetails, HealthIndicator, HealthStatus},
+        },
+        async_trait::async_trait,
+        axum::{http::StatusCode, routing::get, Router},
+        axum_test::TestServer,
+        std::collections::BTreeMap,
+    };
 
     pub struct MockHealthIndicator {
         name: String,
         response: HealthDetail,
-    }
-
-    impl MockHealthIndicator {
-        pub fn new(name: String, response: HealthDetail) -> Self {
-            MockHealthIndicator { name, response }
-        }
     }
 
     #[async_trait]
@@ -177,10 +182,10 @@ mod test {
     async fn test_custom_health_indicator() {
         let router = Router::new().route("/health", get(health)).layer(
             Health::builder()
-                .with_indicator(MockHealthIndicator::new(
-                    "custom".to_string(),
-                    HealthDetail::up(),
-                ))
+                .with_indicator(MockHealthIndicator {
+                    name: "custom".to_string(),
+                    response: HealthDetail::up(),
+                })
                 .build(),
         );
 
@@ -203,14 +208,14 @@ mod test {
     async fn test_status_down() {
         let router = Router::new().route("/health", get(health)).layer(
             Health::builder()
-                .with_indicator(MockHealthIndicator::new(
-                    "upper".to_string(),
-                    HealthDetail::up(),
-                ))
-                .with_indicator(MockHealthIndicator::new(
-                    "downer".to_string(),
-                    HealthDetail::down(),
-                ))
+                .with_indicator(MockHealthIndicator {
+                    name: "upper".to_string(),
+                    response: HealthDetail::up(),
+                })
+                .with_indicator(MockHealthIndicator {
+                    name: "downer".to_string(),
+                    response: HealthDetail::down(),
+                })
                 .build(),
         );
 

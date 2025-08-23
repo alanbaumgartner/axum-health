@@ -1,5 +1,7 @@
-use crate::{HealthDetail, HealthIndicator};
-use async_trait::async_trait;
+use {
+    crate::{HealthDetail, HealthIndicator},
+    async_trait::async_trait,
+};
 
 #[cfg(feature = "diesel")]
 pub mod diesel;

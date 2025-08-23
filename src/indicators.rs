@@ -1,8 +1,9 @@
-use crate::{HealthDetail, HealthIndicator};
-use std::path::PathBuf;
-use std::sync::Arc;
-use async_trait::async_trait;
-use tokio::sync::Mutex;
+use {
+    crate::{HealthDetail, HealthIndicator},
+    async_trait::async_trait,
+    std::{path::PathBuf, sync::Arc},
+    tokio::sync::Mutex,
+};
 
 pub struct DiskSpaceHealthIndicator {
     path: PathBuf,
@@ -42,7 +43,7 @@ impl HealthIndicator for DiskSpaceHealthIndicator {
 
         match disk {
             Some(disk) => {
-                let available_space =disk.available_space();
+                let available_space = disk.available_space();
 
                 let detail = if available_space >= self.threshold {
                     HealthDetail::up()

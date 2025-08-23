@@ -1,12 +1,9 @@
-use axum::extract::State;
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
-use axum::routing::get;
-use axum::Router;
-use axum_health::database::DatabaseHealthIndicator;
-use axum_health::Health;
-use sqlx::SqlitePool;
-use tokio::net::TcpListener;
+use {
+    axum::{extract::State, http::StatusCode, response::IntoResponse, routing::get, Router},
+    axum_health::{database::DatabaseHealthIndicator, Health},
+    sqlx::SqlitePool,
+    tokio::net::TcpListener,
+};
 
 #[tokio::main]
 async fn main() {

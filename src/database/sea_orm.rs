@@ -1,6 +1,4 @@
-use crate::database::Pingable;
-use async_trait::async_trait;
-use sea_orm::DatabaseConnection;
+use {crate::database::Pingable, async_trait::async_trait, sea_orm::DatabaseConnection};
 
 #[async_trait]
 impl Pingable for DatabaseConnection {

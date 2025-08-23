@@ -1,14 +1,15 @@
-use axum::http::StatusCode;
-use axum::routing::get;
-use axum::Router;
-use axum_health::database::DatabaseHealthIndicator;
-use axum_health::health;
-use axum_health::service::{Health, HealthDetail, HealthDetails, HealthIndicator, HealthStatus};
-use axum_test::TestServer;
-use diesel::r2d2::{ConnectionManager, Pool};
-use sea_orm::DatabaseConnection;
-use std::collections::BTreeMap;
-use std::fs::OpenOptions;
+use {
+    axum::{http::StatusCode, routing::get, Router},
+    axum_health::{
+        database::DatabaseHealthIndicator,
+        health,
+        service::{Health, HealthDetail, HealthDetails, HealthIndicator, HealthStatus},
+    },
+    axum_test::TestServer,
+    diesel::r2d2::{ConnectionManager, Pool},
+    sea_orm::DatabaseConnection,
+    std::{collections::BTreeMap, fs::OpenOptions},
+};
 
 #[cfg(feature = "diesel-r2d2")]
 #[tokio::test]
@@ -25,9 +26,11 @@ async fn test_diesel() {
 #[tokio::test]
 async fn test_sqlx() {
     let url = get_sqlite_path();
-    let pool = sqlx::sqlite::SqlitePool::connect(url.as_str()).await.unwrap();
+    let pool = sqlx::sqlite::SqlitePool::connect(url.as_str())
+        .await
+        .unwrap();
     let indicator = DatabaseHealthIndicator::new("sqlx-sqlite".to_owned(), pool);
-    
+
     run_test("sqlx-sqlite".to_owned(), indicator).await;
 }
 
@@ -35,7 +38,9 @@ async fn test_sqlx() {
 #[tokio::test]
 async fn test_sea_orm() {
     let url = get_sqlite_path();
-    let pool = sqlx::sqlite::SqlitePool::connect(url.as_str()).await.unwrap();
+    let pool = sqlx::sqlite::SqlitePool::connect(url.as_str())
+        .await
+        .unwrap();
     let database = DatabaseConnection::from(pool);
     let indicator = DatabaseHealthIndicator::new("sea-orm-sqlite".to_owned(), database);
 

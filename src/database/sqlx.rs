@@ -1,7 +1,8 @@
-use crate::database::Pingable;
-use async_trait::async_trait;
-use sqlx::pool::Pool;
-use sqlx::{Connection, Database};
+use {
+    crate::database::Pingable,
+    async_trait::async_trait,
+    sqlx::{pool::Pool, Connection, Database},
+};
 
 #[async_trait]
 impl<DB> Pingable for Pool<DB>
