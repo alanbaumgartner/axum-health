@@ -54,7 +54,7 @@ pub struct HealthBuilder(BTreeMap<String, Arc<dyn HealthIndicator + Send + Sync 
 
 impl Default for HealthBuilder {
     fn default() -> Self {
-        HealthBuilder(BTreeMap::default()).with_indicator(PingHealthIndicator)
+        HealthBuilder(BTreeMap::default())
     }
 }
 

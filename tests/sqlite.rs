@@ -6,8 +6,6 @@ use {
         service::{Health, HealthDetail, HealthDetails, HealthIndicator, HealthStatus},
     },
     axum_test::TestServer,
-    diesel::r2d2::{ConnectionManager, Pool},
-    sea_orm::DatabaseConnection,
     std::{collections::BTreeMap, fs::OpenOptions},
 };
 
@@ -15,11 +13,11 @@ use {
 #[tokio::test]
 async fn test_diesel() {
     let url = get_sqlite_path();
-    let manager = ConnectionManager::<diesel::SqliteConnection>::new(url);
-    let pool = Pool::builder().build(manager).unwrap();
-    let indicator = DatabaseHealthIndicator::new("diesel-sqlite".to_owned(), pool);
+    let manager = diesel::r2d2::ConnectionManager::<diesel::SqliteConnection>::new(url);
+    let pool = diesel::r2d2::Pool::builder().build(manager).unwrap();
+    let indicator = DatabaseHealthIndicator(pool);
 
-    run_test("diesel-sqlite".to_owned(), indicator).await;
+    run_test(indicator).await;
 }
 
 #[cfg(feature = "sqlx")]
@@ -29,9 +27,9 @@ async fn test_sqlx() {
     let pool = sqlx::sqlite::SqlitePool::connect(url.as_str())
         .await
         .unwrap();
-    let indicator = DatabaseHealthIndicator::new("sqlx-sqlite".to_owned(), pool);
+    let indicator = DatabaseHealthIndicator(pool);
 
-    run_test("sqlx-sqlite".to_owned(), indicator).await;
+    run_test(indicator).await;
 }
 
 #[cfg(feature = "sea-orm")]
@@ -41,10 +39,10 @@ async fn test_sea_orm() {
     let pool = sqlx::sqlite::SqlitePool::connect(url.as_str())
         .await
         .unwrap();
-    let database = DatabaseConnection::from(pool);
-    let indicator = DatabaseHealthIndicator::new("sea-orm-sqlite".to_owned(), database);
+    let database = sea_orm::DatabaseConnection::from(pool);
+    let indicator = DatabaseHealthIndicator(database);
 
-    run_test("sea-orm-sqlite".to_owned(), indicator).await;
+    run_test(indicator).await;
 }
 
 fn get_sqlite_path() -> String {
@@ -61,7 +59,7 @@ fn get_sqlite_path() -> String {
     url.to_owned()
 }
 
-pub async fn run_test(name: String, indicator: impl HealthIndicator + Send + Sync + 'static) {
+pub async fn run_test(indicator: impl HealthIndicator + Send + Sync + 'static) {
     let router = Router::new()
         .route("/health", get(health))
         .layer(Health::builder().with_indicator(indicator).build());
@@ -75,7 +73,7 @@ pub async fn run_test(name: String, indicator: impl HealthIndicator + Send + Syn
 
     let expected = HealthDetails {
         status: HealthStatus::Up,
-        components: BTreeMap::from_iter([(name, HealthDetail::up())]),
+        components: BTreeMap::from_iter([("database".to_string(), HealthDetail::up())]),
     };
 
     assert_eq!(body, expected);

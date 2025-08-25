@@ -11,7 +11,7 @@ async fn main() {
     let pool = Pool::builder().build(manager).unwrap();
 
     // Clone the pool!
-    let indicator = DatabaseHealthIndicator::new("diesel".to_owned(), pool.clone());
+    let indicator = DatabaseHealthIndicator(pool.clone());
 
     let router = Router::new()
         .route("/health", get(axum_health::health))

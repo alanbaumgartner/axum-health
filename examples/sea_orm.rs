@@ -12,7 +12,7 @@ async fn main() {
     let database_connection = DatabaseConnection::from(pool);
 
     // Clone the pool!
-    let indicator = DatabaseHealthIndicator::new("sea-orm".to_owned(), database_connection.clone());
+    let indicator = DatabaseHealthIndicator(database_connection.clone());
 
     let router = Router::new()
         .route("/health", get(axum_health::health))

@@ -19,22 +19,9 @@ pub trait Pingable {
     async fn ping(&self) -> bool;
 }
 
-pub struct DatabaseHealthIndicator<Pool>
+pub struct DatabaseHealthIndicator<Pool>(pub Pool)
 where
-    Pool: Pingable,
-{
-    name: String,
-    pool: Pool,
-}
-
-impl<Pool> DatabaseHealthIndicator<Pool>
-where
-    Pool: Pingable,
-{
-    pub fn new(name: String, pool: Pool) -> Self {
-        DatabaseHealthIndicator { name, pool }
-    }
-}
+    Pool: Pingable;
 
 #[async_trait]
 impl<Pool> HealthIndicator for DatabaseHealthIndicator<Pool>
@@ -42,11 +29,11 @@ where
     Pool: Pingable + Send + Sync + 'static,
 {
     fn name(&self) -> String {
-        self.name.clone()
+        "database".to_string()
     }
 
     async fn details(&self) -> HealthDetail {
-        if self.pool.ping().await {
+        if self.0.ping().await {
             HealthDetail::up()
         } else {
             HealthDetail::down()

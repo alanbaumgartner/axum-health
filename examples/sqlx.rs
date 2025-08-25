@@ -10,7 +10,7 @@ async fn main() {
     let pool = SqlitePool::connect("test.db").await.unwrap();
 
     // Clone the pool!
-    let indicator = DatabaseHealthIndicator::new("sqlx".to_owned(), pool.clone());
+    let indicator = DatabaseHealthIndicator(pool.clone());
 
     let router = Router::new()
         .route("/health", get(axum_health::health))
