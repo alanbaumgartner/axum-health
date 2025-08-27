@@ -16,9 +16,12 @@ async fn main() {
 
     let router = Router::new()
         .route("/health", get(axum_health::health))
-        .route("/things", get(things))
-        // Create a Health layer and add the indicator
-        .layer(Health::builder().with_indicator(indicator).build())
+        .layer(
+            Health::builder()
+                .with_ping()
+                .with_indicator(indicator)
+                .build(),
+        )
         .with_state(database_connection);
 
     let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
@@ -26,9 +29,4 @@ async fn main() {
     axum::serve(listener, router.into_make_service())
         .await
         .unwrap()
-}
-
-async fn things(State(_pool): State<DatabaseConnection>) -> impl IntoResponse {
-    // Do whatever
-    StatusCode::OK
 }

@@ -1,16 +1,28 @@
 use {
-    axum::{extract::State, http::StatusCode, response::IntoResponse, routing::get, Router},
+    axum::{routing::get, Router},
     axum_health::prelude::*,
-    sqlx::SqlitePool,
+    mongodb::{
+        options::{ClientOptions, Credential},
+        Client,
+    },
     tokio::net::TcpListener,
 };
 
 #[tokio::main]
 async fn main() {
-    let pool = SqlitePool::connect(":memory:").await.unwrap();
+    let options = ClientOptions::builder()
+        .credential(
+            Credential::builder()
+                .username(Some("mongo".to_owned()))
+                .password(Some("mongo".to_owned()))
+                .build(),
+        )
+        .build();
+
+    let client = Client::with_options(options).unwrap();
 
     // Clone the pool!
-    let indicator = DatabaseHealthIndicator(pool.clone());
+    let indicator = DatabaseHealthIndicator(client.clone());
 
     let router = Router::new()
         .route("/health", get(axum_health::health))
@@ -20,7 +32,7 @@ async fn main() {
                 .with_indicator(indicator)
                 .build(),
         )
-        .with_state(pool);
+        .with_state(client);
 
     let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
 

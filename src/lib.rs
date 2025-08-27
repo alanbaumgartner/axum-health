@@ -10,11 +10,8 @@ pub mod database;
 
 pub mod indicators;
 
-#[cfg(feature = "kafka")]
-pub mod kafka;
-
 pub mod prelude {
-    #[cfg(any(feature = "sqlx", feature = "diesel", feature = "sqlx"))]
+    #[cfg(feature = "database")]
     pub use crate::database::*;
     pub use {
         super::health,

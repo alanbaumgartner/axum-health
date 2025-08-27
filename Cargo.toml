@@ -26,14 +26,16 @@ diesel = { version = "2", default-features = false, optional = true }
 diesel-async = { version = "0.6", default-features = false, optional = true }
 sea-orm = { version = "1", default-features = false, optional = true }
 sqlx = { version = "0.8", default-features = false, optional = true }
-rdkafka = { version = "0.38", default-features = false, features = ["cmake-build"], optional = true }
-uom = "0.37"
-sysinfo = "0.37"
+scylla = { version = "1", default-features = false, optional = true }
+elasticsearch = { version = "9.1.0-alpha.1", default-features = false, optional = true }
+mongodb = { version = "3", default-features = false, optional = true }
+neo4rs = { version = "0.9.0-rc.8", default-features = false, optional = true }
+redis = { version = "1.0.0-alpha.1", default-features = false, optional = true }
+
+sysinfo = { version = "0.37", optional = true, default-features = false, features = ["disk"] }
 
 [features]
 default = []
-
-kafka = ["rdkafka"]
 
 diesel-deadpool = ["database", "diesel-async", "diesel-async/deadpool"]
 diesel-mobc = ["database", "diesel-async", "diesel-async/mobc"]
@@ -46,19 +48,30 @@ diesel = ["database", "dep:diesel", "diesel/i-implement-a-third-party-backend-an
 sea-orm = ["database", "dep:sea-orm"]
 sqlx = ["database", "dep:sqlx"]
 
+cassandra = ["database", "dep:scylla"]
+elasticsearch = ["database", "dep:elasticsearch"]
+mongo = ["database", "dep:mongodb"]
+neo4j = ["database", "dep:neo4rs"]
+neo4j-summary = ["neo4j", "neo4rs/unstable-bolt-protocol-impl-v2"]
+redis = ["database", "dep:redis"]
+
 database = []
+
+disk = ["dep:sysinfo"]
 
 [dev-dependencies]
 diesel-async = { version = "0.6", features = ["mysql", "sqlite", "postgres", "deadpool", "mobc", "bb8"] }
 diesel = { version = "2", features = ["r2d2", "mysql", "sqlite", "postgres"] }
 sqlx = { version = "0.8", features = ["runtime-tokio", "mysql", "sqlite", "postgres"] }
 sea-orm = { version = "1", features = ["sqlx-postgres", "sqlx-mysql", "sqlx-sqlite"] }
-axum-test = "17"
+axum-test = "18"
 tokio = { version = "1", features = ["test-util"] }
-testcontainers = { version = "0.23" }
-testcontainers-modules = { version = "0.12", features = ["postgres", "mysql"] }
-tempfile = "3"
-rdkafka = { version = "0.38.0", features = ["cmake-build"] }
+testcontainers = { version = "0.25.0" }
+testcontainers-modules = { version = "0.13", features = ["postgres", "mysql"] }
+mongodb = { version = "3" }
+
+[[example]]
+name = "simple"
 
 [[example]]
 name = "diesel"
@@ -73,5 +86,22 @@ name = "sqlx"
 required-features = ["database", "sqlx", "sqlx/sqlite"]
 
 [[example]]
-name = "kafka"
-required-features = ["kafka"]
+name = "neo4j"
+required-features = ["database", "neo4j"]
+
+[[example]]
+name = "cassandra"
+required-features = ["database", "cassandra"]
+
+[[example]]
+name = "redis"
+required-features = ["database", "redis"]
+
+[[example]]
+name = "mongo"
+required-features = ["database", "mongo"]
+
+[[example]]
+name = "elasticsearch"
+required-features = ["database", "elasticsearch"]
+

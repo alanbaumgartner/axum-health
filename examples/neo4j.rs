@@ -1,29 +1,30 @@
 use {
-    axum::{extract::State, http::StatusCode, response::IntoResponse, routing::get, Router},
-    axum_health::prelude::*,
-    sqlx::SqlitePool,
+    axum::{routing::get, Router},
+    axum_health::{database::Neo4jHealthIndicator, prelude::*},
+    neo4rs::Graph,
     tokio::net::TcpListener,
 };
 
 #[tokio::main]
 async fn main() {
-    let pool = SqlitePool::connect(":memory:").await.unwrap();
-
-    // Clone the pool!
-    let indicator = DatabaseHealthIndicator(pool.clone());
+    let uri = "127.0.0.1:7687";
+    let user = "neo4j";
+    let pass = "neo4j";
+    let graph = Graph::new(uri, user, pass).unwrap();
 
     let router = Router::new()
         .route("/health", get(axum_health::health))
         .layer(
             Health::builder()
                 .with_ping()
-                .with_indicator(indicator)
+                .with_indicator(Neo4jHealthIndicator::new(graph.clone()))
                 .build(),
         )
-        .with_state(pool);
+        .with_state(graph);
 
     let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
 
+    // GET http://localhost:3000/health
     axum::serve(listener, router.into_make_service())
         .await
         .unwrap()

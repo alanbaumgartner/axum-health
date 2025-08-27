@@ -1,15 +1,10 @@
 use {
     crate::service::{HealthDetail, HealthIndicator},
     async_trait::async_trait,
-    std::{path::PathBuf, sync::Arc},
-    tokio::sync::Mutex,
 };
 
-pub struct DiskSpaceHealthIndicator {
-    path: PathBuf,
-    threshold: u64,
-    info: Arc<Mutex<sysinfo::Disks>>,
-}
+#[cfg(feature = "disk")]
+pub use disk::*;
 
 pub struct PingHealthIndicator;
 
@@ -24,44 +19,60 @@ impl HealthIndicator for PingHealthIndicator {
     }
 }
 
-#[async_trait]
-impl HealthIndicator for DiskSpaceHealthIndicator {
-    fn name(&self) -> String {
-        "disk_space".to_owned()
+#[cfg(feature = "disk")]
+mod disk {
+    use {
+        crate::prelude::{HealthDetail, HealthIndicator},
+        async_trait::async_trait,
+        std::{path::PathBuf, sync::Arc},
+        tokio::sync::Mutex,
+    };
+
+    pub struct DiskSpaceHealthIndicator {
+        path: PathBuf,
+        threshold: u64,
+        info: Arc<Mutex<sysinfo::Disks>>,
     }
 
-    async fn details(&self) -> HealthDetail {
-        let mut info = self.info.lock().await;
+    #[async_trait]
+    impl HealthIndicator for DiskSpaceHealthIndicator {
+        fn name(&self) -> String {
+            "disk_space".to_owned()
+        }
 
-        info.refresh(true);
+        async fn details(&self) -> HealthDetail {
+            let mut info = self.info.lock().await;
 
-        let disk = info
-            .list()
-            .iter()
-            .filter(|disk| self.path.starts_with(disk.mount_point()))
-            .next();
+            info.refresh(true);
 
-        match disk {
-            Some(disk) => {
-                let available_space = disk.available_space();
+            let disk = info
+                .list()
+                .iter()
+                .filter(|disk| self.path.starts_with(disk.mount_point()))
+                .next();
 
-                let detail = if available_space >= self.threshold {
-                    HealthDetail::up()
-                } else {
-                    HealthDetail::down()
-                };
+            match disk {
+                Some(disk) => {
+                    let available_space = disk.available_space();
 
-                let total_space = disk.total_space();
+                    let detail = if available_space >= self.threshold {
+                        HealthDetail::up()
+                    } else {
+                        HealthDetail::down()
+                    };
 
-                detail
-                    .with_detail("total", total_space)
-                    .with_detail("free", available_space)
+                    let total_space = disk.total_space();
+
+                    detail
+                        .with_detail("total", total_space)
+                        .with_detail("free", available_space)
+                        .with_detail("threshold", self.threshold)
+                        .with_detail("exists", true)
+                }
+                None => HealthDetail::down()
                     .with_detail("threshold", self.threshold)
-                    .with_detail("exists", true)
+                    .with_detail("exists", false),
             }
-            None => HealthDetail::down()
-                .with_detail("threshold", self.threshold)
-                .with_detail("exists", false),
         }
     }
 }

@@ -101,8 +101,8 @@ pub struct HealthDetails {
 impl IntoResponse for HealthDetails {
     fn into_response(self) -> Response {
         let status_code = match &self.status {
-            HealthStatus::Down | HealthStatus::OutOfService => StatusCode::SERVICE_UNAVAILABLE,
-            _ => StatusCode::OK,
+            HealthStatus::Up => StatusCode::OK,
+            _ => StatusCode::SERVICE_UNAVAILABLE,
         };
         (status_code, Json(self)).into_response()
     }
