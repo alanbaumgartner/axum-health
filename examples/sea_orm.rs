@@ -1,6 +1,6 @@
 use {
     axum::{extract::State, http::StatusCode, response::IntoResponse, routing::get, Router},
-    axum_health::{database::DatabaseHealthIndicator, Health},
+    axum_health::prelude::*,
     sea_orm::DatabaseConnection,
     sqlx::SqlitePool,
     tokio::net::TcpListener,
@@ -8,7 +8,7 @@ use {
 
 #[tokio::main]
 async fn main() {
-    let pool = SqlitePool::connect("test.db").await.unwrap();
+    let pool = SqlitePool::connect(":memory:").await.unwrap();
     let database_connection = DatabaseConnection::from(pool);
 
     // Clone the pool!

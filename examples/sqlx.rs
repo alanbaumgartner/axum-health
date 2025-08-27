@@ -1,13 +1,13 @@
 use {
     axum::{extract::State, http::StatusCode, response::IntoResponse, routing::get, Router},
-    axum_health::{database::DatabaseHealthIndicator, Health},
+    axum_health::prelude::*,
     sqlx::SqlitePool,
     tokio::net::TcpListener,
 };
 
 #[tokio::main]
 async fn main() {
-    let pool = SqlitePool::connect("test.db").await.unwrap();
+    let pool = SqlitePool::connect(":memory:").await.unwrap();
 
     // Clone the pool!
     let indicator = DatabaseHealthIndicator(pool.clone());

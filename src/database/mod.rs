@@ -1,14 +1,24 @@
 use {
-    crate::{HealthDetail, HealthIndicator},
+    crate::service::{HealthDetail, HealthIndicator},
     async_trait::async_trait,
 };
 
 #[cfg(feature = "diesel")]
-pub mod diesel;
+mod diesel;
 #[cfg(feature = "sea-orm")]
-pub mod sea_orm;
+mod sea_orm;
 #[cfg(feature = "sqlx")]
-pub mod sqlx;
+mod sqlx;
+
+#[allow(unused_imports)]
+#[cfg(feature = "diesel")]
+pub use diesel::*;
+#[allow(unused_imports)]
+#[cfg(feature = "sea-orm")]
+pub use sea_orm::*;
+#[allow(unused_imports)]
+#[cfg(feature = "sqlx")]
+pub use sqlx::*;
 
 /// [DatabaseHealthIndicator] can be used with anything that implements this trait.
 /// [diesel], [sea-orm], and [sqlx] all implement some form of a `ping` operation on their connection
@@ -29,7 +39,7 @@ where
     Pool: Pingable + Send + Sync + 'static,
 {
     fn name(&self) -> String {
-        "database".to_string()
+        "database".to_owned()
     }
 
     async fn details(&self) -> HealthDetail {

@@ -1,13 +1,13 @@
 use {
     axum::{extract::State, http::StatusCode, response::IntoResponse, routing::get, Router},
-    axum_health::{database::DatabaseHealthIndicator, Health},
+    axum_health::prelude::*,
     diesel::r2d2::{ConnectionManager, Pool},
     tokio::net::TcpListener,
 };
 
 #[tokio::main]
 async fn main() {
-    let manager = ConnectionManager::<diesel::SqliteConnection>::new("test.db");
+    let manager = ConnectionManager::<diesel::SqliteConnection>::new(":memory:");
     let pool = Pool::builder().build(manager).unwrap();
 
     // Clone the pool!

@@ -68,7 +68,7 @@
 // #[async_trait]
 // impl HealthIndicator for KafkaHealthIndicator {
 //     fn name(&self) -> String {
-//         "kafka".to_string()
+//         "kafka".to_owned()
 //     }
 //
 //     async fn details(&self) -> HealthDetail {

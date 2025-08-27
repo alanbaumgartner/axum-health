@@ -59,6 +59,10 @@ impl Default for HealthBuilder {
 }
 
 impl HealthBuilder {
+    pub fn with_ping(self) -> Self {
+        self.with_indicator(PingHealthIndicator)
+    }
+
     pub fn with_indicator<I>(mut self, indicator: I) -> Self
     where
         I: HealthIndicator + Send + Sync + 'static,
@@ -183,7 +187,7 @@ mod test {
         let router = Router::new().route("/health", get(health)).layer(
             Health::builder()
                 .with_indicator(MockHealthIndicator {
-                    name: "custom".to_string(),
+                    name: "custom".to_owned(),
                     response: HealthDetail::up(),
                 })
                 .build(),
@@ -209,11 +213,11 @@ mod test {
         let router = Router::new().route("/health", get(health)).layer(
             Health::builder()
                 .with_indicator(MockHealthIndicator {
-                    name: "upper".to_string(),
+                    name: "upper".to_owned(),
                     response: HealthDetail::up(),
                 })
                 .with_indicator(MockHealthIndicator {
-                    name: "downer".to_string(),
+                    name: "downer".to_owned(),
                     response: HealthDetail::down(),
                 })
                 .build(),

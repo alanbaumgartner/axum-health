@@ -1,5 +1,5 @@
 use {
-    crate::{HealthDetail, HealthIndicator},
+    crate::service::{HealthDetail, HealthIndicator},
     async_trait::async_trait,
     std::{path::PathBuf, sync::Arc},
     tokio::sync::Mutex,
@@ -16,7 +16,7 @@ pub struct PingHealthIndicator;
 #[async_trait]
 impl HealthIndicator for PingHealthIndicator {
     fn name(&self) -> String {
-        "ping".to_string()
+        "ping".to_owned()
     }
 
     async fn details(&self) -> HealthDetail {
@@ -27,7 +27,7 @@ impl HealthIndicator for PingHealthIndicator {
 #[async_trait]
 impl HealthIndicator for DiskSpaceHealthIndicator {
     fn name(&self) -> String {
-        "disk_space".to_string()
+        "disk_space".to_owned()
     }
 
     async fn details(&self) -> HealthDetail {

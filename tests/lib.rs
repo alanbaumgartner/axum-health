@@ -1,6 +1,6 @@
 use {
     axum::{http::StatusCode, routing::get, Router},
-    axum_health::{Health, HealthDetails, HealthIndicator},
+    axum_health::prelude::*,
     axum_test::TestServer,
 };
 
