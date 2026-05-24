@@ -1,6 +1,6 @@
 use {
     axum::{routing::get, Router},
-    axum_health::{database::Neo4jHealthIndicator, prelude::*},
+    axum_health::prelude::*,
     neo4rs::Graph,
     tokio::net::TcpListener,
 };
@@ -13,11 +13,11 @@ async fn main() {
     let graph = Graph::new(uri, user, pass).unwrap();
 
     let router = Router::new()
-        .route("/health", get(axum_health::health))
+        .route("/health", get(health_check))
         .layer(
             Health::builder()
                 .with_ping()
-                .with_indicator(Neo4jHealthIndicator::new(graph.clone()))
+                .with_indicator(graph.clone())
                 .build(),
         )
         .with_state(graph);

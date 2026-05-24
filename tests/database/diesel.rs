@@ -2,12 +2,12 @@
 mod r2d2 {
     use {
         crate::{
-            database::util::{get_mysql_container, get_postgres_container},
+            database::util::{get_mysql_container, get_postgres_container, health_details},
             test_indicator,
         },
         axum_health::prelude::*,
         diesel::r2d2::ConnectionManager,
-        std::{collections::BTreeMap, time::Duration},
+        std::time::Duration,
     };
 
     #[tokio::test]
@@ -21,14 +21,9 @@ mod r2d2 {
             .build(manager)
             .unwrap();
 
-        let indicator = DatabaseHealthIndicator(pool);
+        let expected = health_details("postgres", HealthStatus::Up);
 
-        let expected = HealthDetails {
-            status: HealthStatus::Up,
-            components: BTreeMap::from_iter([("database".to_owned(), HealthDetail::up())]),
-        };
-
-        let result = test_indicator(indicator).await;
+        let result = test_indicator(pool).await;
 
         assert_eq!(result, expected);
     }
@@ -43,14 +38,9 @@ mod r2d2 {
             .build(manager)
             .unwrap();
 
-        let indicator = DatabaseHealthIndicator(pool);
+        let expected = health_details("mysql", HealthStatus::Up);
 
-        let expected = HealthDetails {
-            status: HealthStatus::Up,
-            components: BTreeMap::from_iter([("database".to_owned(), HealthDetail::up())]),
-        };
-
-        let result = test_indicator(indicator).await;
+        let result = test_indicator(pool).await;
 
         assert_eq!(result, expected);
     }
@@ -64,14 +54,9 @@ mod r2d2 {
             .build(manager)
             .unwrap();
 
-        let indicator = DatabaseHealthIndicator(pool);
+        let expected = health_details("sqlite", HealthStatus::Up);
 
-        let expected = HealthDetails {
-            status: HealthStatus::Up,
-            components: BTreeMap::from_iter([("database".to_owned(), HealthDetail::up())]),
-        };
-
-        let result = test_indicator(indicator).await;
+        let result = test_indicator(pool).await;
 
         assert_eq!(result, expected);
     }
@@ -81,12 +66,12 @@ mod r2d2 {
 mod bb8 {
     use {
         crate::{
-            database::util::{get_mysql_container, get_postgres_container},
+            database::util::{get_mysql_container, get_postgres_container, health_details},
             test_indicator,
         },
         axum_health::prelude::*,
         diesel_async::{pooled_connection::AsyncDieselConnectionManager, AsyncPgConnection},
-        std::{collections::BTreeMap, time::Duration},
+        std::time::Duration,
     };
 
     #[tokio::test]
@@ -100,14 +85,9 @@ mod bb8 {
             .await
             .unwrap();
 
-        let indicator = DatabaseHealthIndicator(pool);
+        let expected = health_details("postgres", HealthStatus::Up);
 
-        let expected = HealthDetails {
-            status: HealthStatus::Up,
-            components: BTreeMap::from_iter([("database".to_owned(), HealthDetail::up())]),
-        };
-
-        let result = test_indicator(indicator).await;
+        let result = test_indicator(pool).await;
 
         assert_eq!(result, expected);
     }
@@ -124,14 +104,9 @@ mod bb8 {
             .await
             .unwrap();
 
-        let indicator = DatabaseHealthIndicator(pool);
+        let expected = health_details("mysql", HealthStatus::Up);
 
-        let expected = HealthDetails {
-            status: HealthStatus::Up,
-            components: BTreeMap::from_iter([("database".to_owned(), HealthDetail::up())]),
-        };
-
-        let result = test_indicator(indicator).await;
+        let result = test_indicator(pool).await;
 
         assert_eq!(result, expected);
     }
@@ -141,12 +116,11 @@ mod bb8 {
 mod deadpool {
     use {
         crate::{
-            database::util::{get_mysql_container, get_postgres_container},
+            database::util::{get_mysql_container, get_postgres_container, health_details},
             test_indicator,
         },
         axum_health::prelude::*,
         diesel_async::{pooled_connection::AsyncDieselConnectionManager, AsyncPgConnection},
-        std::collections::BTreeMap,
     };
 
     #[tokio::test]
@@ -158,14 +132,9 @@ mod deadpool {
             .build()
             .unwrap();
 
-        let indicator = DatabaseHealthIndicator(pool);
+        let expected = health_details("postgres", HealthStatus::Up);
 
-        let expected = HealthDetails {
-            status: HealthStatus::Up,
-            components: BTreeMap::from_iter([("database".to_owned(), HealthDetail::up())]),
-        };
-
-        let result = test_indicator(indicator).await;
+        let result = test_indicator(pool).await;
 
         assert_eq!(result, expected);
     }
@@ -180,14 +149,9 @@ mod deadpool {
             .build()
             .unwrap();
 
-        let indicator = DatabaseHealthIndicator(pool);
+        let expected = health_details("mysql", HealthStatus::Up);
 
-        let expected = HealthDetails {
-            status: HealthStatus::Up,
-            components: BTreeMap::from_iter([("database".to_owned(), HealthDetail::up())]),
-        };
-
-        let result = test_indicator(indicator).await;
+        let result = test_indicator(pool).await;
 
         assert_eq!(result, expected);
     }
@@ -196,10 +160,15 @@ mod deadpool {
 #[cfg(feature = "diesel-mobc")]
 mod mobc {
     use {
-        crate::{database::util::get_postgres_container, test_indicator},
+        crate::{
+            database::util::{get_mysql_container, get_postgres_container, health_details},
+            test_indicator,
+        },
         axum_health::prelude::*,
-        diesel_async::{pooled_connection::AsyncDieselConnectionManager, AsyncPgConnection},
-        std::collections::BTreeMap,
+        diesel_async::{
+            pooled_connection::AsyncDieselConnectionManager, AsyncMysqlConnection,
+            AsyncPgConnection,
+        },
     };
 
     #[tokio::test]
@@ -210,14 +179,24 @@ mod mobc {
             .max_open(1)
             .build(manager);
 
-        let indicator = DatabaseHealthIndicator(pool);
+        let expected = health_details("postgres", HealthStatus::Up);
 
-        let expected = HealthDetails {
-            status: HealthStatus::Up,
-            components: BTreeMap::from_iter([("database".to_owned(), HealthDetail::up())]),
-        };
+        let result = test_indicator(pool).await;
 
-        let result = test_indicator(indicator).await;
+        assert_eq!(result, expected);
+    }
+
+    #[tokio::test]
+    async fn mysql() {
+        let (url, _connection) = get_mysql_container().await;
+        let manager = AsyncDieselConnectionManager::<AsyncMysqlConnection>::new(url.to_owned());
+        let pool = diesel_async::pooled_connection::mobc::Pool::builder()
+            .max_open(1)
+            .build(manager);
+
+        let expected = health_details("mysql", HealthStatus::Up);
+
+        let result = test_indicator(pool).await;
 
         assert_eq!(result, expected);
     }

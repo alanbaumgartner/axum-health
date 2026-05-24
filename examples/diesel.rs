@@ -1,5 +1,5 @@
 use {
-    axum::{extract::State, http::StatusCode, response::IntoResponse, routing::get, Router},
+    axum::{routing::get, Router},
     axum_health::prelude::*,
     diesel::r2d2::{ConnectionManager, Pool},
     tokio::net::TcpListener,
@@ -10,15 +10,12 @@ async fn main() {
     let manager = ConnectionManager::<diesel::SqliteConnection>::new(":memory:");
     let pool = Pool::builder().build(manager).unwrap();
 
-    // Clone the pool!
-    let indicator = DatabaseHealthIndicator(pool.clone());
-
     let router = Router::new()
-        .route("/health", get(axum_health::health))
+        .route("/health", get(health_check))
         .layer(
             Health::builder()
                 .with_ping()
-                .with_indicator(indicator)
+                .with_indicator(pool.clone())
                 .build(),
         )
         .with_state(pool);

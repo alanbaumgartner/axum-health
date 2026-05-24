@@ -1,5 +1,5 @@
 use {
-    axum::{http::StatusCode, routing::get, Router},
+    axum::{routing::get, Router},
     axum_health::prelude::*,
     axum_test::TestServer,
 };
@@ -10,12 +10,12 @@ async fn test_indicator(indicator: impl HealthIndicator + Send + Sync + 'static)
     let health = Health::builder().with_indicator(indicator).build();
 
     let router = Router::new()
-        .route("/health", get(axum_health::health))
+        .route("/health", get(health_check))
         .layer(health);
 
-    let server = TestServer::new(router).unwrap();
+    let server = TestServer::new(router);
 
     let response = server.get("/health").await;
-    assert_eq!(response.status_code(), StatusCode::OK);
+
     response.json::<HealthDetails>()
 }

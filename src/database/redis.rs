@@ -1,12 +1,19 @@
 use {
-    crate::database::Pingable,
+    crate::{indicator::HealthDetail, prelude::HealthIndicator},
     async_trait::async_trait,
     redis::{Client, Commands},
 };
 
 #[async_trait]
-impl Pingable for Client {
-    async fn ping(&self) -> bool {
-        Commands::ping::<String>(&mut self.clone()).is_ok()
+impl HealthIndicator for Client {
+    fn name(&self) -> String {
+        String::from("redis")
+    }
+
+    async fn details(&self) -> HealthDetail {
+        match Commands::ping::<String>(&mut self.clone()) {
+            Ok(_ok) => HealthDetail::up(),
+            Err(_) => HealthDetail::down(),
+        }
     }
 }

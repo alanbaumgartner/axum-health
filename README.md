@@ -15,13 +15,14 @@
 async fn main() {
     let pool = SqlitePool::connect("test.db").await.unwrap();
 
-    // Clone the pool!
-    let indicator = DatabaseHealthIndicator::new("sqlite".to_owned(), pool.clone());
-
     let router = Router::new()
-        .route("/health", get(axum_health::health))
+        .route("/health",get(health_check))
         // Create a Health layer and add the indicator
-        .layer(Health::builder().with_indicator(indicator).build())
+        .layer(
+            Health::builder()
+                .with_indicator(pool.clone())
+                .build()
+        )
         .with_state(pool);
 
     let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
@@ -46,4 +47,4 @@ The health endpoint will respond
 }
 ```
 
-Checkout the [examples](/examples)
+Check out the [examples](/examples)

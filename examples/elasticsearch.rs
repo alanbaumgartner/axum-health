@@ -10,15 +10,12 @@ async fn main() {
     let transport = Transport::single_node("http://localhost:9200").unwrap();
     let client = Elasticsearch::new(transport);
 
-    // Clone the pool!
-    let indicator = DatabaseHealthIndicator(client.clone());
-
     let router = Router::new()
-        .route("/health", get(axum_health::health))
+        .route("/health", get(health_check))
         .layer(
             Health::builder()
                 .with_ping()
-                .with_indicator(indicator)
+                .with_indicator(client.clone())
                 .build(),
         )
         .with_state(client);

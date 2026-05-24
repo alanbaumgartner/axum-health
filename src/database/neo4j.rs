@@ -1,43 +1,19 @@
 use {
-    crate::{
-        database::Pingable,
-        prelude::{HealthDetail, HealthIndicator},
-    },
+    crate::prelude::{HealthDetail, HealthIndicator},
     async_trait::async_trait,
     neo4rs::Graph,
 };
 
-pub struct Neo4jHealthIndicator {
-    graph: Graph,
-}
-
-impl Neo4jHealthIndicator {
-    const CYPHER: &'static str = "CALL dbms.components() YIELD versions, name, edition WHERE name = 'Neo4j Kernel' RETURN edition, versions[0] as version";
-
-    pub fn new(graph: Graph) -> Self {
-        Self { graph }
-    }
-}
+const CYPHER: &str = "CALL dbms.components() YIELD versions, name, edition WHERE name = 'Neo4j Kernel' RETURN edition, versions[0] as version";
 
 #[async_trait]
-impl Pingable for Graph {
-    async fn ping(&self) -> bool {
-        self.run(Neo4jHealthIndicator::CYPHER).await.is_ok()
-    }
-}
-
-#[async_trait]
-impl HealthIndicator for Neo4jHealthIndicator {
+impl HealthIndicator for Graph {
     fn name(&self) -> String {
-        "neo4j".to_owned()
+        String::from("neo4j")
     }
 
     async fn details(&self) -> HealthDetail {
-        let result = self
-            .graph
-            .clone()
-            .execute(Neo4jHealthIndicator::CYPHER)
-            .await;
+        let result = self.execute(CYPHER).await;
 
         match result {
             Ok(mut result) => {

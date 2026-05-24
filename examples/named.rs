@@ -6,9 +6,12 @@ use {
 
 #[tokio::main]
 async fn main() {
-    let router = Router::new()
-        .route("/health", get(health_check))
-        .layer(Health::builder().with_ping().build());
+    let router = Router::new().route("/health", get(health_check)).layer(
+        Health::builder()
+            .with_ping()
+            .with_indicator(PingHealthIndicator.named("other ping".to_string()))
+            .build(),
+    );
 
     let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
 

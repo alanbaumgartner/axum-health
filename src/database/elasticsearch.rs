@@ -1,8 +1,19 @@
-use {crate::database::Pingable, async_trait::async_trait, elasticsearch::Elasticsearch};
+use {
+    crate::{indicator::HealthDetail, prelude::HealthIndicator},
+    async_trait::async_trait,
+    elasticsearch::Elasticsearch,
+};
 
 #[async_trait]
-impl Pingable for Elasticsearch {
-    async fn ping(&self) -> bool {
-        self.ping().send().await.is_ok()
+impl HealthIndicator for Elasticsearch {
+    fn name(&self) -> String {
+        "elasticsearch".to_owned()
+    }
+
+    async fn details(&self) -> HealthDetail {
+        match self.ping().send().await {
+            Ok(_) => HealthDetail::up(),
+            Err(_) => HealthDetail::down(),
+        }
     }
 }

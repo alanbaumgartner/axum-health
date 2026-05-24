@@ -19,20 +19,21 @@ tokio = { version = "1" }
 async-trait = { version = "0" }
 axum = { version = "0.8" }
 serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 tower-layer = { version = "0.3" }
 futures = { version = "0.3" }
 
 diesel = { version = "2", default-features = false, optional = true }
-diesel-async = { version = "0.6", default-features = false, optional = true }
+diesel-async = { version = "0.9", default-features = false, optional = true }
 sea-orm = { version = "1", default-features = false, optional = true }
-sqlx = { version = "0.8", default-features = false, optional = true }
+sqlx = { version = "0.9", default-features = false, optional = true }
 scylla = { version = "1", default-features = false, optional = true }
 elasticsearch = { version = "9.1.0-alpha.1", default-features = false, optional = true }
 mongodb = { version = "3", default-features = false, optional = true }
 neo4rs = { version = "0.9.0-rc.8", default-features = false, optional = true }
 redis = { version = "1.0.0-alpha.1", default-features = false, optional = true }
 
-sysinfo = { version = "0.37", optional = true, default-features = false, features = ["disk"] }
+sysinfo = { version = "0.39", optional = true, default-features = false, features = ["disk"] }
 
 [features]
 default = []
@@ -43,7 +44,7 @@ diesel-bb8 = ["database", "diesel-async", "diesel-async/bb8"]
 diesel-async = ["database", "diesel", "dep:diesel-async"]
 
 diesel-r2d2 = ["database", "diesel", "diesel/r2d2"]
-diesel = ["database", "dep:diesel", "diesel/i-implement-a-third-party-backend-and-opt-into-breaking-changes"]
+diesel = ["database", "dep:diesel"]
 
 sea-orm = ["database", "dep:sea-orm"]
 sqlx = ["database", "dep:sqlx"]
@@ -60,22 +61,25 @@ database = []
 disk = ["dep:sysinfo"]
 
 [dev-dependencies]
-diesel-async = { version = "0.6", features = ["mysql", "sqlite", "postgres", "deadpool", "mobc", "bb8"] }
+diesel-async = { version = "0.9", features = ["mysql", "sqlite", "postgres", "deadpool", "mobc", "bb8"] }
 diesel = { version = "2", features = ["r2d2", "mysql", "sqlite", "postgres"] }
-sqlx = { version = "0.8", features = ["runtime-tokio", "mysql", "sqlite", "postgres"] }
-sea-orm = { version = "1", features = ["sqlx-postgres", "sqlx-mysql", "sqlx-sqlite"] }
-axum-test = "18"
+sqlx = { version = "0.9", features = ["runtime-tokio", "mysql", "sqlite", "postgres"] }
+sea-orm = { version = "1", features = ["sqlx-postgres", "sqlx-mysql", "sqlx-sqlite", "runtime-tokio"] }
+axum-test = "20"
 tokio = { version = "1", features = ["test-util"] }
-testcontainers = { version = "0.25.0" }
-testcontainers-modules = { version = "0.13", features = ["postgres", "mysql"] }
+testcontainers = { version = "0.27" }
+testcontainers-modules = { version = "0.15", features = ["postgres", "mysql", "redis", "elastic_search", "mongo", "neo4j", "scylladb"] }
 mongodb = { version = "3" }
 
 [[example]]
 name = "simple"
 
 [[example]]
+name = "named"
+
+[[example]]
 name = "diesel"
-required-features = ["database", "diesel", "diesel/sqlite"]
+required-features = ["database", "diesel", "diesel-r2d2", "diesel/sqlite"]
 
 [[example]]
 name = "sea_orm"

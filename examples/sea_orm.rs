@@ -1,25 +1,20 @@
 use {
-    axum::{extract::State, http::StatusCode, response::IntoResponse, routing::get, Router},
+    axum::{routing::get, Router},
     axum_health::prelude::*,
-    sea_orm::DatabaseConnection,
-    sqlx::SqlitePool,
+    sea_orm::Database,
     tokio::net::TcpListener,
 };
 
 #[tokio::main]
 async fn main() {
-    let pool = SqlitePool::connect(":memory:").await.unwrap();
-    let database_connection = DatabaseConnection::from(pool);
-
-    // Clone the pool!
-    let indicator = DatabaseHealthIndicator(database_connection.clone());
+    let database_connection = Database::connect(":memory:").await.unwrap();
 
     let router = Router::new()
-        .route("/health", get(axum_health::health))
+        .route("/health", get(health_check))
         .layer(
             Health::builder()
                 .with_ping()
-                .with_indicator(indicator)
+                .with_indicator(database_connection.clone())
                 .build(),
         )
         .with_state(database_connection);

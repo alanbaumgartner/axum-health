@@ -16,15 +16,12 @@ async fn main() {
 
     let session = Arc::new(session);
 
-    // Clone the pool!
-    let indicator = DatabaseHealthIndicator(session.clone());
-
     let router = Router::new()
-        .route("/health", get(axum_health::health))
+        .route("/health", get(health_check))
         .layer(
             Health::builder()
                 .with_ping()
-                .with_indicator(indicator)
+                .with_indicator(session.clone())
                 .build(),
         )
         .with_state(session);

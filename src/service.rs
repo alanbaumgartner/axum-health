@@ -1,14 +1,7 @@
 use {
-    crate::indicators::PingHealthIndicator,
-    async_trait::async_trait,
-    axum::{
-        http::StatusCode,
-        middleware::AddExtension,
-        response::{IntoResponse, Response},
-        Extension, Json,
-    },
+    crate::{indicator::*, indicators::PingHealthIndicator},
+    axum::{middleware::AddExtension, Extension},
     futures::StreamExt,
-    serde::{Deserialize, Serialize},
     std::{collections::BTreeMap, sync::Arc},
     tower_layer::Layer,
 };
@@ -32,7 +25,7 @@ impl Health {
             .values()
             .map(|detail| &detail.status)
             .max()
-            .cloned()
+            .copied()
             .unwrap_or(HealthStatus::Up);
 
         HealthDetails {
@@ -50,13 +43,8 @@ impl<S> Layer<S> for Health {
     }
 }
 
+#[derive(Default)]
 pub struct HealthBuilder(BTreeMap<String, Arc<dyn HealthIndicator + Send + Sync + 'static>>);
-
-impl Default for HealthBuilder {
-    fn default() -> Self {
-        HealthBuilder(BTreeMap::default())
-    }
-}
 
 impl HealthBuilder {
     pub fn with_ping(self) -> Self {
@@ -76,71 +64,11 @@ impl HealthBuilder {
     }
 }
 
-#[async_trait]
-pub trait HealthIndicator {
-    fn name(&self) -> String;
-    async fn details(&self) -> HealthDetail;
-}
-
-#[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Serialize, Deserialize)]
-pub enum HealthStatus {
-    Up,
-    Down,
-    OutOfService,
-    Unknown,
-    Custom(String),
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub struct HealthDetails {
-    pub status: HealthStatus,
-    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-    pub components: BTreeMap<String, HealthDetail>,
-}
-
-impl IntoResponse for HealthDetails {
-    fn into_response(self) -> Response {
-        let status_code = match &self.status {
-            HealthStatus::Up => StatusCode::OK,
-            _ => StatusCode::SERVICE_UNAVAILABLE,
-        };
-        (status_code, Json(self)).into_response()
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub struct HealthDetail {
-    pub status: HealthStatus,
-    pub details: BTreeMap<String, String>,
-}
-
-impl HealthDetail {
-    pub fn new(status: HealthStatus) -> Self {
-        HealthDetail {
-            status,
-            details: Default::default(),
-        }
-    }
-
-    pub fn up() -> Self {
-        HealthDetail::new(HealthStatus::Up)
-    }
-
-    pub fn down() -> Self {
-        HealthDetail::new(HealthStatus::Down)
-    }
-
-    pub fn with_detail(mut self, name: impl ToString, detail: impl ToString) -> Self {
-        self.details.insert(name.to_string(), detail.to_string());
-        self
-    }
-}
-
 #[cfg(test)]
 mod test {
     use {
         crate::{
-            health,
+            health_check,
             service::{Health, HealthDetail, HealthDetails, HealthIndicator, HealthStatus},
         },
         async_trait::async_trait,
@@ -168,10 +96,10 @@ mod test {
     #[tokio::test]
     async fn test_health() {
         let router = Router::new()
-            .route("/health", get(health))
+            .route("/health", get(health_check))
             .layer(Health::builder().build());
 
-        let server = TestServer::new(router).unwrap();
+        let server = TestServer::new(router);
         let response = server.get("/health").await;
 
         let body = response.json::<HealthDetails>();
@@ -184,7 +112,7 @@ mod test {
 
     #[tokio::test]
     async fn test_custom_health_indicator() {
-        let router = Router::new().route("/health", get(health)).layer(
+        let router = Router::new().route("/health", get(health_check)).layer(
             Health::builder()
                 .with_indicator(MockHealthIndicator {
                     name: "custom".to_owned(),
@@ -193,7 +121,7 @@ mod test {
                 .build(),
         );
 
-        let server = TestServer::new(router).unwrap();
+        let server = TestServer::new(router);
         let response = server.get("/health").await;
 
         assert_eq!(response.status_code(), StatusCode::OK);
@@ -210,7 +138,7 @@ mod test {
 
     #[tokio::test]
     async fn test_status_down() {
-        let router = Router::new().route("/health", get(health)).layer(
+        let router = Router::new().route("/health", get(health_check)).layer(
             Health::builder()
                 .with_indicator(MockHealthIndicator {
                     name: "upper".to_owned(),
@@ -223,7 +151,7 @@ mod test {
                 .build(),
         );
 
-        let server = TestServer::new(router).unwrap();
+        let server = TestServer::new(router);
         let response = server.get("/health").await;
 
         assert_eq!(response.status_code(), StatusCode::SERVICE_UNAVAILABLE);

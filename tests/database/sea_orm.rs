@@ -1,23 +1,18 @@
 use {
     crate::{
-        database::util::{get_mysql_container, get_postgres_container},
+        database::util::{get_mysql_container, get_postgres_container, health_details},
         test_indicator,
     },
     axum_health::prelude::*,
     sea_orm::{Database, DatabaseConnection},
-    std::collections::BTreeMap,
 };
 
 #[tokio::test]
 async fn mysql() {
     let (url, _container) = get_mysql_container().await;
     let db: DatabaseConnection = Database::connect(&url).await.unwrap();
-    let indicator = DatabaseHealthIndicator(db);
-    let expected = HealthDetails {
-        status: HealthStatus::Up,
-        components: BTreeMap::from_iter([("database".to_owned(), HealthDetail::up())]),
-    };
-    let result = test_indicator(indicator).await;
+    let expected = health_details("mysql", HealthStatus::Up);
+    let result = test_indicator(db).await;
     assert_eq!(result, expected);
 }
 
@@ -25,23 +20,15 @@ async fn mysql() {
 async fn postgres() {
     let (url, _container) = get_postgres_container().await;
     let db: DatabaseConnection = Database::connect(&url).await.unwrap();
-    let indicator = DatabaseHealthIndicator(db);
-    let expected = HealthDetails {
-        status: HealthStatus::Up,
-        components: BTreeMap::from_iter([("database".to_owned(), HealthDetail::up())]),
-    };
-    let result = test_indicator(indicator).await;
+    let expected = health_details("postgres", HealthStatus::Up);
+    let result = test_indicator(db).await;
     assert_eq!(result, expected);
 }
 
 #[tokio::test]
 async fn sqlite() {
     let db: DatabaseConnection = Database::connect("sqlite::memory:").await.unwrap();
-    let indicator = DatabaseHealthIndicator(db);
-    let expected = HealthDetails {
-        status: HealthStatus::Up,
-        components: BTreeMap::from_iter([("database".to_owned(), HealthDetail::up())]),
-    };
-    let result = test_indicator(indicator).await;
+    let expected = health_details("sqlite", HealthStatus::Up);
+    let result = test_indicator(db).await;
     assert_eq!(result, expected);
 }

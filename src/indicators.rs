@@ -1,5 +1,5 @@
 use {
-    crate::service::{HealthDetail, HealthIndicator},
+    crate::indicator::{HealthDetail, HealthIndicator},
     async_trait::async_trait,
 };
 
@@ -34,10 +34,20 @@ mod disk {
         info: Arc<Mutex<sysinfo::Disks>>,
     }
 
+    impl DiskSpaceHealthIndicator {
+        pub fn new(path: PathBuf, threshold: u64) -> Self {
+            Self {
+                path,
+                threshold,
+                info: Arc::new(Mutex::new(sysinfo::Disks::new())),
+            }
+        }
+    }
+
     #[async_trait]
     impl HealthIndicator for DiskSpaceHealthIndicator {
         fn name(&self) -> String {
-            "disk_space".to_owned()
+            String::from("disk_space")
         }
 
         async fn details(&self) -> HealthDetail {
@@ -48,8 +58,7 @@ mod disk {
             let disk = info
                 .list()
                 .iter()
-                .filter(|disk| self.path.starts_with(disk.mount_point()))
-                .next();
+                .find(|disk| self.path.starts_with(disk.mount_point()));
 
             match disk {
                 Some(disk) => {
