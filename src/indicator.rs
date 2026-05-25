@@ -1,9 +1,9 @@
 use {
     async_trait::async_trait,
     axum::{
+        Json,
         http::StatusCode,
         response::{IntoResponse, Response},
-        Json,
     },
     serde::{Deserialize, Serialize},
     serde_json::Value,

@@ -1,9 +1,9 @@
 use {
-    axum::{routing::get, Router},
+    axum::{Router, routing::get},
     axum_health::prelude::*,
     mongodb::{
-        options::{ClientOptions, Credential},
         Client,
+        options::{ClientOptions, Credential},
     },
     tokio::net::TcpListener,
 };

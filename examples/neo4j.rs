@@ -1,5 +1,5 @@
 use {
-    axum::{routing::get, Router},
+    axum::{Router, routing::get},
     axum_health::prelude::*,
     neo4rs::Graph,
     tokio::net::TcpListener,

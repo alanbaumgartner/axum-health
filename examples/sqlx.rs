@@ -1,5 +1,5 @@
 use {
-    axum::{routing::get, Router},
+    axum::{Router, routing::get},
     axum_health::prelude::*,
     sqlx::SqlitePool,
     tokio::net::TcpListener,

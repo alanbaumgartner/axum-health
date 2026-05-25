@@ -1,7 +1,7 @@
 use {
     crate::{indicator::HealthDetail, prelude::HealthIndicator},
     async_trait::async_trait,
-    sqlx::{pool::Pool, Connection},
+    sqlx::{Connection, pool::Pool},
 };
 
 macro_rules! sqlx_health_indicator {

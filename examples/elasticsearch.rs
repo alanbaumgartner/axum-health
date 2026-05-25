@@ -1,7 +1,7 @@
 use {
-    axum::{routing::get, Router},
+    axum::{Router, routing::get},
     axum_health::prelude::*,
-    elasticsearch::{http::transport::Transport, Elasticsearch},
+    elasticsearch::{Elasticsearch, http::transport::Transport},
     tokio::net::TcpListener,
 };
 

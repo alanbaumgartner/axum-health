@@ -1,7 +1,7 @@
 use {
     axum_health::prelude::{HealthDetail, HealthDetails, HealthStatus},
     std::collections::BTreeMap,
-    testcontainers_modules::testcontainers::{runners::AsyncRunner, ContainerAsync},
+    testcontainers_modules::testcontainers::{ContainerAsync, runners::AsyncRunner},
 };
 
 #[cfg(feature = "redis")]

@@ -4,7 +4,7 @@ use {
         test_indicator,
     },
     axum_health::prelude::*,
-    elasticsearch::{http::transport::Transport, Elasticsearch},
+    elasticsearch::{Elasticsearch, http::transport::Transport},
 };
 
 #[tokio::test]

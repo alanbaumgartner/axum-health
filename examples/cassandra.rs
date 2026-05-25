@@ -1,5 +1,5 @@
 use {
-    axum::{routing::get, Router},
+    axum::{Router, routing::get},
     axum_health::prelude::*,
     scylla::client::{session::Session, session_builder::SessionBuilder},
     std::sync::Arc,

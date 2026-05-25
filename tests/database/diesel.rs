@@ -70,7 +70,7 @@ mod bb8 {
             test_indicator,
         },
         axum_health::prelude::*,
-        diesel_async::{pooled_connection::AsyncDieselConnectionManager, AsyncPgConnection},
+        diesel_async::{AsyncPgConnection, pooled_connection::AsyncDieselConnectionManager},
         std::time::Duration,
     };
 
@@ -120,7 +120,7 @@ mod deadpool {
             test_indicator,
         },
         axum_health::prelude::*,
-        diesel_async::{pooled_connection::AsyncDieselConnectionManager, AsyncPgConnection},
+        diesel_async::{AsyncPgConnection, pooled_connection::AsyncDieselConnectionManager},
     };
 
     #[tokio::test]
@@ -166,8 +166,8 @@ mod mobc {
         },
         axum_health::prelude::*,
         diesel_async::{
-            pooled_connection::AsyncDieselConnectionManager, AsyncMysqlConnection,
-            AsyncPgConnection,
+            AsyncMysqlConnection, AsyncPgConnection,
+            pooled_connection::AsyncDieselConnectionManager,
         },
     };
 

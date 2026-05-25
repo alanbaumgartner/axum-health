@@ -1,12 +1,12 @@
 use {
     crate::prelude::Health,
-    axum::{response::IntoResponse, Extension},
+    axum::{Extension, response::IntoResponse},
 };
 
-pub mod service;
 pub mod database;
 pub mod indicator;
 pub mod indicators;
+pub mod service;
 
 pub mod prelude {
     #[allow(unused_imports)]

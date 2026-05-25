@@ -30,8 +30,7 @@ impl HealthIndicator for Graph {
                 };
 
                 #[cfg(feature = "neo4j-summary")]
-                let Ok(summary) = result.finish().await
-                else {
+                let Ok(summary) = result.finish().await else {
                     return HealthDetail::down();
                 };
 

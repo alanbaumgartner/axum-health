@@ -1,6 +1,6 @@
 use {
     crate::{indicator::*, indicators::PingHealthIndicator},
-    axum::{middleware::AddExtension, Extension},
+    axum::{Extension, middleware::AddExtension},
     futures::StreamExt,
     std::{collections::BTreeMap, sync::Arc},
     tower_layer::Layer,
@@ -72,7 +72,7 @@ mod test {
             service::{Health, HealthDetail, HealthDetails, HealthIndicator, HealthStatus},
         },
         async_trait::async_trait,
-        axum::{http::StatusCode, routing::get, Router},
+        axum::{Router, http::StatusCode, routing::get},
         axum_test::TestServer,
         std::collections::BTreeMap,
     };
