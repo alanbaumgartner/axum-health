@@ -1,23 +1,24 @@
 use {
     axum::{routing::get, Router},
     axum_health::prelude::*,
-    sqlx::SqlitePool,
+    elasticsearch::{http::transport::Transport, Elasticsearch},
     tokio::net::TcpListener,
 };
 
 #[tokio::main]
 async fn main() {
-    let pool = SqlitePool::connect(":memory:").await.unwrap();
+    let transport = Transport::single_node("http://localhost:9200").unwrap();
+    let client = Elasticsearch::new(transport);
 
     let router = Router::new()
         .route("/health", get(health_check))
         .layer(
             Health::builder()
                 .with_ping()
-                .with_indicator(pool.clone())
+                .with_indicator(client.clone())
                 .build(),
         )
-        .with_state(pool);
+        .with_state(client);
 
     let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
 

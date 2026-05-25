@@ -1,11 +1,27 @@
+#![allow(unused_imports)]
+
+use {
+    crate::prelude::Health,
+    axum::{response::IntoResponse, Extension},
+};
+
 pub mod service;
 
+#[cfg(feature = "database")]
 pub mod database;
 
-pub use crate::service::*;
+pub mod indicator;
+pub mod indicators;
 
-pub async fn health(
-    axum::Extension(health): axum::Extension<Health>,
-) -> impl axum::response::IntoResponse {
+pub mod prelude {
+    #[cfg(feature = "database")]
+    pub use crate::database::*;
+    pub use {
+        super::health_check,
+        crate::{indicator::*, indicators::*, service::*},
+    };
+}
+
+pub async fn health_check(Extension(health): Extension<Health>) -> impl IntoResponse {
     health.details().await
 }
