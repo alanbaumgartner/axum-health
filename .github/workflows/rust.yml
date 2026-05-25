@@ -21,4 +21,4 @@ jobs:
       - name: Build
         run: cargo build
       - name: Test
-        run: cargo nextest run --features=diesel-deadpool,diesel-mobc,diesel-bb8,diesel-r2d2,sea-orm,sqlx
+        run: cargo nextest run --all-features
