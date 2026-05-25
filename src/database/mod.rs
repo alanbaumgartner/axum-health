@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 #[cfg(feature = "cassandra")]
 mod cassandra;
 #[cfg(feature = "diesel")]
@@ -17,7 +19,6 @@ mod sqlx;
 
 #[cfg(feature = "cassandra")]
 pub use cassandra::*;
-#[allow(unused_imports)]
 #[cfg(feature = "diesel")]
 pub use diesel::*;
 #[cfg(feature = "elasticsearch")]
@@ -28,9 +29,7 @@ pub use mongo::*;
 pub use neo4j::*;
 #[cfg(feature = "redis")]
 pub use redis::*;
-#[allow(unused_imports)]
 #[cfg(feature = "sea-orm")]
 pub use sea_orm::*;
-#[allow(unused_imports)]
 #[cfg(feature = "sqlx")]
 pub use sqlx::*;

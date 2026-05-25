@@ -1,7 +1,7 @@
 [package]
 name = "axum-health"
-version = "0.1.2"
-edition = "2021"
+version = "0.2.0"
+edition = "2024"
 authors = ["Alan Baumgartner"]
 license = "MIT OR Apache-2.0"
 keywords = ["axum", "diesel", "sqlx", "sea-orm"]
@@ -33,28 +33,28 @@ mongodb = { version = "3", default-features = false, optional = true }
 neo4rs = { version = "0.9.0-rc.8", default-features = false, optional = true }
 redis = { version = "1.0.0-alpha.1", default-features = false, optional = true }
 
-sysinfo = { version = "0.39", optional = true, default-features = false, features = ["disk"] }
+sysinfo = { version = "0.39", default-features = false, optional = true, features = ["disk"] }
 
 [features]
 default = []
 
-diesel-deadpool = ["database", "diesel-async", "diesel-async/deadpool"]
-diesel-mobc = ["database", "diesel-async", "diesel-async/mobc"]
-diesel-bb8 = ["database", "diesel-async", "diesel-async/bb8"]
-diesel-async = ["database", "diesel", "dep:diesel-async"]
+diesel-deadpool = ["diesel-async", "diesel-async/deadpool"]
+diesel-mobc = ["diesel-async", "diesel-async/mobc"]
+diesel-bb8 = ["diesel-async", "diesel-async/bb8"]
+diesel-async = ["diesel", "dep:diesel-async"]
 
-diesel-r2d2 = ["database", "diesel", "diesel/r2d2"]
-diesel = ["database", "dep:diesel"]
+diesel-r2d2 = ["diesel", "diesel/r2d2"]
+diesel = ["dep:diesel"]
 
-sea-orm = ["database", "dep:sea-orm"]
-sqlx = ["database", "dep:sqlx"]
+sea-orm = ["dep:sea-orm"]
+sqlx = ["dep:sqlx"]
 
-cassandra = ["database", "dep:scylla"]
-elasticsearch = ["database", "dep:elasticsearch"]
-mongo = ["database", "dep:mongodb"]
-neo4j = ["database", "dep:neo4rs"]
+cassandra = ["dep:scylla"]
+elasticsearch = ["dep:elasticsearch"]
+mongo = ["dep:mongodb"]
+neo4j = ["dep:neo4rs"]
 neo4j-summary = ["neo4j", "neo4rs/unstable-bolt-protocol-impl-v2"]
-redis = ["database", "dep:redis"]
+redis = ["dep:redis"]
 
 database = []
 
@@ -79,33 +79,33 @@ name = "named"
 
 [[example]]
 name = "diesel"
-required-features = ["database", "diesel", "diesel-r2d2", "diesel/sqlite"]
+required-features = ["diesel", "diesel-r2d2", "diesel/sqlite"]
 
 [[example]]
 name = "sea_orm"
-required-features = ["database", "sea-orm", "sea-orm/sqlx-sqlite"]
+required-features = ["sea-orm", "sea-orm/sqlx-sqlite"]
 
 [[example]]
 name = "sqlx"
-required-features = ["database", "sqlx", "sqlx/sqlite"]
+required-features = ["sqlx", "sqlx/sqlite"]
 
 [[example]]
 name = "neo4j"
-required-features = ["database", "neo4j"]
+required-features = ["neo4j"]
 
 [[example]]
 name = "cassandra"
-required-features = ["database", "cassandra"]
+required-features = ["cassandra"]
 
 [[example]]
 name = "redis"
-required-features = ["database", "redis"]
+required-features = ["redis"]
 
 [[example]]
 name = "mongo"
-required-features = ["database", "mongo"]
+required-features = ["mongo"]
 
 [[example]]
 name = "elasticsearch"
-required-features = ["database", "elasticsearch"]
+required-features = ["elasticsearch"]
 

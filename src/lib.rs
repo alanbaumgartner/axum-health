@@ -1,20 +1,15 @@
-#![allow(unused_imports)]
-
 use {
     crate::prelude::Health,
     axum::{response::IntoResponse, Extension},
 };
 
 pub mod service;
-
-#[cfg(feature = "database")]
 pub mod database;
-
 pub mod indicator;
 pub mod indicators;
 
 pub mod prelude {
-    #[cfg(feature = "database")]
+    #[allow(unused_imports)]
     pub use crate::database::*;
     pub use {
         super::health_check,
