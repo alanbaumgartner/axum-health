@@ -1,6 +1,7 @@
 use {
     axum_health::prelude::{HealthDetail, HealthDetails, HealthStatus},
     std::collections::BTreeMap,
+    testcontainers::ImageExt,
     testcontainers_modules::testcontainers::{ContainerAsync, runners::AsyncRunner},
 };
 
@@ -50,7 +51,11 @@ pub async fn get_postgres_container() -> (String, ContainerAsync<Postgres>) {
 
 #[cfg(feature = "cassandra")]
 pub async fn get_cassandra_container() -> (String, ContainerAsync<ScyllaDB>) {
-    let container = ScyllaDB::default().start().await.unwrap();
+    let container = ScyllaDB::default()
+        .with_cmd(["--broadcast-rpc-address 127.0.0.1"])
+        .start()
+        .await
+        .unwrap();
 
     let host = container.get_host().await.unwrap().to_string();
     let port = container.get_host_port_ipv4(9042).await.unwrap();
